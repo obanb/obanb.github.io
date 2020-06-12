@@ -1,0 +1,137 @@
+---
+layout: default
+modal-id: 2
+date: 2014-07-17
+img: cake.png
+alt: image-alt
+project-date: April 2014
+client: Start Bootstrap
+category: Web Development
+description: Use this area of the page to describe your project. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Mollitia neque assumenda ipsam nihil, molestias magnam, recusandae quos quis inventore quisquam velit asperiores, vitae? Reprehenderit soluta, eos quod consequuntur itaque. Nam.
+---
+
+Vítám čtenáře u prvního dílu ApiTree seriálu o funkcionálním programování v TypeScriptu, který bude (mimo jiné) postupně představovat
+vybrané featury knihoven z rodiny FP-TS. Lehký [úvod](https://www.apitree.cz/blog/funkcionalni-programovani-v-typescriptu) do FP máme za sebou, vrhněme se tedy
+na praktičtější implementaci.
+Jsou dva typy problémů, na které programátor naráží neustále. Error handling a null values. 
+V tomto povídání se chci zaměřit na error handling v TypeScriptu a jeho, dle mého, vylepšenou alternativu v pojetí knihovny FP-TS.
+
+## V čem je problém?
+
+1. Pokud programátor explicitně nedefinuje v typové anotaci - dokáže s "pomocí" TS poměrně úspěšně zakrýt implementaci error handlingu uvnitř struktury.
+2. TypeScript nijak nevynucuje typovou anotaci takové struktury a ani nemusí správně strukturu pochopit pro type inference.
+3. Každý programátor má svobodu (často bohužel) implementovat error handling po svém. Jednou chybu propaguje skrze throw, jednou jen loguje, jindy zase zapisuje do databázové entity. Takové chování často vede k problémům při kompozici funkcí.
+4. Různé typy chyb a jejich handlery spolu často nesouzní.
+5. Na ošetření chyby se často úplně zapomene. Hello unhandled promise rejection :-)
+6. Funkcionální přístup je chyby přímo nevyhazovat, ale kontrolovaně zprostředkovat zachycené. 
+7. Pokud každou chybu programátor uvnitř funkce handluje po svém, rozhoduje o nakládání s chybou předčasně.
+8. Celé je to punk, který vede k nárůstu chyb či problému při jejich logování/dohledávání! 
+
+
+Praktická ukázka záměrně neoptimálního error handlingu v TS. 
+
+    const getSomeDataThrow = (data: string) => {
+      try {
+        const result = fakeDataProducer(data);
+        return result.someData;
+      } catch (e) {
+        throw new Error(e);
+      }
+    };
+
+Kód je samozřejmě osekaný na minimum, ale problém je už při typové anotaci. TypeScript bez explicitního označení vrátí string, což může způsobit poměrně nepříjemné překvapení při pohledu zvenčí. Funkce nikterak neproklamuje, že je potenciálně nebezpečná a při kompozici více takovýchto entit, problém vyvstává násobně. 
+Pokračujeme dál.
+
+    const getSomeDataLog = (data: string) => {
+      try {
+        const result = fakeDataProducer(data);
+        return result.someData;
+      } catch (e) {
+        db.someEntity.errors.push(e);
+        console.log(JSON.stringify(e));
+      }
+    };
+
+Stejný problém v typové anotaci, funkce údajně vrací string a tentokrát nedochází k throw erroru, ale k zalogování a zápisu do db entity. Ano, typ se dá explicitně vyjádřit, ale svoboda je zrádná.
+Pokud obě funkce složíme do nějaké obdoby pipe/flow, obloha vypadá sluníčkově. 
+
+    const result = pipe(
+      'some string data',
+      getSomeDataThrow,
+      getSomeDataLog,
+    )
+
+Pod kapotou se ale pipe nyní může chovat nepředvídatelně. Přidejme asynchronní kód a na unhandled errory máme zaděláno.
+
+# Either monáda
+V TypeScriptu to ale dokážeme lépe, funkcionálně a čistě. 
+Nejprve trocha teorie, ale opravdu jen trocha s odkazem na můj první [článek](https://www.apitree.cz/blog/funkcionalni-programovani-v-typescriptu).
+**Proč je Either monádou?**
+Představme si strukturu, která dokáže přijmout data v obálce, rozbalit si její obsah, aplikovat na něj funkci, a výsledek do obálky zpět zabalit. Máme funktor.
+Strukturu upgradujme a umožněme ji přijmout v obálce nejen value, ale funkci, kterou následně aplikuje na data z jiné obálky. Máme applicative funktor. Zhruba.
+Přidejme schopnost balit data z obálky do funkce, která vrací data v jiné obálce - nazvěme ji například flatmap nebo chain, a blížíme se k monádě.
+Abstraktní? Rozhodně. Pro představu před praktickou ukázkou dostačující. Monáda je pro nás zatím nějaká algebraická struktura, která dokáže poměrně komplexně manipulovat s jinou podobnou strukturou.
+
+**Kolejnice**
+Either je tedy monádou, wrapperem nad daty, který dokáže pracovat s wrapperem podobného ražení, případně data zabalit do wrapperu či rozbalit.
+Typické pro monádu typu Either je (resp. technika, kterou Either implementuje) je tzv. railway oriented programming - aneb programování v kolejničkách. Levá kolejnička veze vagón s errory, pravá zase s výsledky. Either<Error, Result>. 
+Pojďme si tedy přepsat předchozí kód. Nejprve ve verzi, kdy si Either kolejnice explicitně nadefinujeme a trochu si zaprasíme. Poté v rafinovanější build in formě.
+
+    const getFakeDataEither = (data: string): E.Either<Error, string> => {
+      try {
+        const result = fakeDataProducer(data);
+        return E.right(result.someData);
+      } catch (e) {
+        return E.left(Error(e));
+      }
+    };
+
+Jak je z kódu zřejmé. V případě že nedojde k zachycení chyby v try větvi, zabalíme hodnotu do pravé (té happy day) kolejnice. V případě že chybu zachytíme, pojedeme po kolejnici levé. Tadá, právě jsme vytvořili Either monádu, která jasně deklaruje chybový i nechybový scénář. 
+Pojďme nyní napsat kód správně a využít předpřipravenou funkci vhodnou pro náš scénář.
+
+    const getFakeDataEither = (data: string): E.Either<Error, string> => {
+      return (
+        E.tryCatch < Error,string >(() => fakeDataProducer(data).someData, (e) => Error(JSON.stringify(e)))
+      );
+    };
+
+Využili jsme vestavěnou tryCatch funkci, která vrací Either monádu se stringem coby kladným výsledkem a Errorem coby chybovou hodnotou. Jasně deklarujeme co je naším záměrem, potenciální chybovost funkce, a type inference funguje dle očekávání (typ deklaruji jen pro přehled).
+Dobrá, máme tedy monádu. Co ale dál? Co takhle náš výsledný string rozšířit v případě, že se vykonání funkce povedlo? Jak ale na to, vždyť máme data zabalena v nějakém pochybném wrapperu? Použijme funkci map.
+
+    const eitherTest: E.Either<Error, string> = pipe(
+      "some string data",
+      getFakeDataEither,
+      E.map((value) => `${value} updated`)
+    );
+
+Jak vidno, pro zachování našich kolejnic a update stringu, stačí jediné - využít vlastnost (odvozenou z funktoru) map, která je (jak jsem již výše popisoval) schopna rozbalit výsledek getFakeData, na výsledku provolat deklarovanou funkci s updatem value a data znovu do obálky zabalit. V případě, že by při volání getFakeData nastala chyba, následující funkce se nikdy nevykoná a monáda v levé branch podrží error. 
+Co se ale stane, pokud sama řetězená funkce vrací jako návratovou hodnotu také monádu? Případ je to častý a i na něj máme řešení. Flatmap neboli chain. 
+Nejprve předvedu chybnou variantu.
+
+    const wrongEitherTest = pipe("some string data", getFakeDataEither, E.map(getFakeDataEither));
+    
+Jaký typ nám následující funkce vrací? E.Either<Error,  E.Either<Error,  string>>
+
+Huh. Obálka v obálce. A nyní chain. 
+
+     const niceEitherTest = pipe("some string data", getFakeDataEither, E.chain(getFakeDataEither));
+
+Výsledným typem jest náš nádherný E.Either<Error,  string>
+
+Prozatím posledním krokem bude data z obálky vytáhnout. Frontendisté jsou banda nerudná (něco jako trpaslíci) a za návratovou hodnotu z API typu Object {_tag: "Right", right: "some string data"}, by nás jistě vykostila. 
+
+    const eitherFold: string = pipe(
+      "some string data",
+      getFakeDataEither,
+      E.chain(getFakeDataEither),
+      E.fold(
+        (e) => JSON.stringify(e),
+        (res) => res
+      )
+    );
+
+Sic trochu kostrbatě, ale rozbalený string je na světě. Obecně je však ideální provádět transformace nad daty v obálkách a jejich rozbalení ponechávat na výstupy aplikace. Jak z hlediska znovupoužitelnosti, tak z pohledu handlingu side efektů.
+# Závěrem
+Právě jsme v mírně neučesané lite formě použili Either monádu s error handlingem (stejně tak ho lze využít například pro validace). API Either je samozřejmě rozsáhlejší, ale pro základní pochopení problematiky je příklad doufám dostačující.
+Samotná problematika řetězení a skládání algebraických struktur je komplexnější, FP-TS poskytuje další transformační funkce - například pro přechod z jednoho typu monády do jiného(například Option > Either), různé vychytávky pro rozbalení values, asynchronní programování (Task, TaskEither) a nástroje pro všemožné iterace a ohebnou manipulaci s objekty podobného typu. O tom ale zase v dalších dílech.
+Funkcionálnímu TypeScriptu zdar!
