@@ -1,11 +1,219 @@
 ---
+title: FP-TS 2 - Option
 layout: default
-modal-id: 2
-date: 2014-07-17
+modal-id: 1
+date: 2020-06-20
 img: cake.png
 alt: image-alt
-project-date: April 2014
-client: Start Bootstrap
-category: Web Development
+project-date: Červen 2020
+category: TypeScript, NodeJS, funkcionální programování
 description: Use this area of the page to describe your project. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Mollitia neque assumenda ipsam nihil, molestias magnam, recusandae quos quis inventore quisquam velit asperiores, vitae? Reprehenderit soluta, eos quod consequuntur itaque. Nam.
 ---
+<br/>
+V [minulém díle](https://www.apitree.cz/blog/fp-ts-either) jsem se věnoval problému error handlingu za pomocí Either monády. 
+Jestli je TypeScriptu (platí většinou i obecně napříč jazyky) nějaký další vývojářský perpetuum mobile, pak je to ošetřování null/undefined values a návazná problematika - jejich řetězení, zanořování, typová (ne)deklarace. 
+
+**V čem je problém?**
+
+> - Undefined i null (byť null považuji za více controlled) jsou často velmi vágní ukazatel. Jednou vznikají kontrolovaně jako zamýšlený výsledek komputace, podruhé mimoděk - například jako dotaz na neexistující API, nezinicializovaná instance knihovny, nenalezená data, špatná časová inicializace u asynchronního programování atd.)
+> - Neustálý check null values je poměrně otravný, dává slušný prostor k chybám ("Jéé, já zapomněl otazník a ono to na count of undefined při testech nikdy nespadlo!") a k alternativním přístupům k null handlingu.
+> - V kódu vzniká velká spousta podmínek (if pejsek then kočička). Nehledě na check hell u nested objektů. Byť v TS existuje Optional chaining/Nullish Coalescing , které problém mohou mírně redukovat.
+> - Často je nutná ruční transformace z null value na propagaci chyby (if !pejsek then throw('missing pejsek'), která opět vede k "urob si sám" error šlamastikám.
+> - Kombinace error a null handlingu vede v případě ošetření uvnitř funkcí k nepřehledným strukturám, o to víc v případě funkcionálnějšího přístupu, kdy funkce řetězíme v různých pipes/flows, ale netušíme jaký šelmostroj se uvnitř skrývá. Deklarativnější přístup může při řetězení funkcí působit při nevyužití typů jako jsou například monády, poněkud neprůhledně.
+> - Chybí obecně přijímaný postup pro handling výše zmíněného.
+> - Kombinace různých přístupů (programátorů i technologií) činí z null handlingu rajskou zahradu plnou poletujících bugů.
+
+Nyní k praktické ukázce. Nejprve tradiční přístup, poté přístup FP-TS. 
+
+    interface Client {
+        name: string,
+            data?: {
+                id: number,
+                title ? : string
+            } []
+    }
+    
+    interface ErrorType1{
+	    msg:string,
+	    type:string
+    }
+    const errorType1 = (msg: string, type: string) => ({
+        msg,
+        type
+    })
+    
+    interface ErrorType2{
+	    id: number
+	    msg:string,
+    }
+    const errorType2 = (id: number, msg: string) => ({
+        msg,
+    })
+    
+    
+    const initClient = () => {
+        const client = {
+            name: 'someClient',
+            data: [{
+                    id: 1,
+                    title: 'data1'
+                },
+                {
+                    id: 2,
+                    title: undefined
+                },
+    
+            ]
+        }
+        return client as Client | undefined; // fejkujeme nespolehlivého clienta pro účel článku
+    }
+    
+    const printClientName = (client ? : Client) => {
+        if (client) {
+            console.log(client.name);
+            return client;
+        } else {
+            throw errorType1('client not found', 'COMMON');
+        }
+    }
+    
+    const printFirstDataTitle = (clientData: {
+        id: number,
+        title ? : string
+    } []) => {
+        if (clientData && clientData.length > 0) {
+	        const clientDataTitle = clientData[0].title;
+	        if(clientDataTitle){
+		        console.log(clientDataTitle );
+		        return clientDataTitle; 
+	        }
+        } else {
+            throw errorType2(1, 'clientData error');
+        }
+    }
+    
+    const resultPipe = pipe(
+        initClient(),
+        printClientName,
+        (client => client.data),
+        printFirstDataTitle
+    )
+
+Ano, kód by se samozřejmě dal strukturovat lépe, ale na druhou stranu poměrně věrně zobrazuje několik neduhů. V několika bodech by bylo snadné vyrobit chybu s chybějícím null checkem, handling erorru není vůbec vidět v typové anotaci/inference, ve finálním řetězu funkcí (pipe) se s errorem bez ohledání implementaci funkcí vůbec nepočítá a celé je to navíc při pohledu na pipe nic neříkající o nebezpečích, které funkce mohou ukrývat.
+
+# Option
+
+Nyní zkusíme variantu FP-TS a jednu z profláklejších monád - Option, občas zvanou jako Maybe.
+A protože jsme si v [minulém článku](https://www.apitree.cz/blog/fp-ts-either) ukázali jako pracovat s Either monádou, využijeme rovnou jejich kombinaci.
+
+    const initClient = (): O.Option <Client> => {
+        const client = {
+            name: 'someClient',
+            data: [{
+                    id: 1,
+                    title: 'data1'
+                },
+                {
+                    id: 2,
+                    title: undefined
+                },
+    
+            ]
+        }
+        return O.fromNullable(client);
+    }
+
+Jako první jsem si pomocí **fromNullable** vytvořil z undefined/null value nový typ: Option monádu: 
+typová anotace vypadá jako **O.Option < Client >** a v debugu by se nám objevil jevil jako **{_tag: "Some", value: Object}**, případně jako **{_tag: "None"}**. 
+
+A v **{_tag: "None"}** je právě ten fígl. Zaprvé - v Option monádě nadále nepracujeme s undefined nebo null value, ale speciálním objektem otagovaným jako None, přičemž jakýkoliv další map/chain volaný nad takovýmto objektem zkontroluje zda není otagovám jako None a rovnou posílá výsledek do kolejnice pro empty value. Podobně jako Either pracuje s left, pracuje i Maybe s tagem none.
+
+Jako další si vydefinujeme naší funkcí pro získání name z klienta, ale naschvál ji ponecháme bez ošetření, abychom si ukázali jak takovou funkci ošetříme obalením Maybe monádou "zvenčí".
+
+    const printClientName = (client: Client) => {
+        console.log(client.name);
+        return client;
+    }
+
+OK. Vytvoříme si první kousky pipe z našich dvou funkcí. Pro přehled deklaruji typ předem.
+
+    const result: O.Option<Client> = pipe(
+        initClient(),
+        O.map(printClientName),
+    )
+
+Výsledek je tedy entita, která v prvním kroku ve funkci initClientFp a vrátí Option monádu - value nebo None.
+Následně použijeme funkci map, která jako první argument příjme naší Option monádu a jako druhý funkci.
+Interně prověří zda je příchozí monáda None, a pokud ano, jede po prázdné kolejničce a funkci printClientNameFp nikdy nevykoná. 
+
+Popojedeme dál. V původních funkcích jsem "ručně" handloval error uvnitř scope, nyní si ukážeme jak ohandlovat prázdnout value zvenčí a propojit dvě monády přechodem mezi Option a Either. Pokud Option vrátí None, Either aktivuje svou levou větev a od programátora očekává chybovou událost.
+
+    const result: E.Either<ErrorType1,Client> = pipe(
+        initClient(),
+        O.mapNullable(printClientName),
+        E.fromOption(() => errorType1('client not found', 'COMMON'))
+    )
+
+Typ se nám změnil na  **E.Either<ErrorType1,Client>**. Jasně deklarujeme, že máme co dočinění s možnou error value a už při čtení pipe, bez znalosti implementace funkcí, jasně vidíme že máme co dočinění s null/error handlingem.
+
+Nyní přepíšeme naší poslední funkcí, která musí nakouknout do prvního prvku pole (pokud existuje a pokud má alespoň jeden item), v prvku najít title  a ten vytisknout. V Případě že nenajde chybejici data, musí vrátit chybu a transformovat se v Either.
+
+    const printFirstDataTitle: E.Either<ErrorType2,string> = (clientData: {
+        id: number,
+        title ? : string
+    } []) => pipe(
+        O.fromNullable(clientData),
+        O.chain((data) => A.lookup(0, data)),
+        O.mapNullable((item) => item.title),
+        O.map(title => {
+            console.log(title);
+            return title;
+        }),
+        E.fromOption(() => errorType2(1,'clientData error'))
+    )
+
+Chain nebo flatmap sme si vysvětlovali v minulém díle, ale pro jistotu zopakuji - chain vezme data z monády (O.fromNullable(clientData)) a aplikuje na ně funkci, která také vrací monádu (funkce A.lookup vrací Option< itemZPole >) a  narozdíl od map  už výsledek znovu nebalí sama do sebe - nevzniká tak Option uvnitř Option ala **Option<Option< string>>**. 
+
+Pro úplnost obecnější pohled - map umožňuje mapování mezi kategoriemi (viz. funktor) - tzn. rozbalí value z wrapperu a po provedení funkce data do wrapperu znovu zabalí. Flatmap/chain již value obalovat nemusí, protože sama funkce prováděná nad value vrací výsledek ve wrapperu (monádě např.).
+
+Pojďme sestavit naší závěrečnou pipe.
+
+    const result = pipe(
+        initClient(),
+        O.mapNullable(printClientName),
+        E.fromOption(() => errorType1('client not found', 'COMMON')),
+        E.map(client => client.data),
+        E.chain(printFirstDataTitle) // printFirstDataTitle vrací Either<ErrorType2, string>,
+    )
+
+Bác. Něco ošklivého se přihodilo. IDE vrátilo ošklivé červené s hláškou tohoto stříhu: **Type 'Left< ErrorType1 >' is not assignable to type 'Left< ErrorType2 >**'.
+
+Co se právě přihodilo? Jedná se o neduh v chování FP-TS, který ve starších verzích knihovny poměrně komplikoval vývoj a nutil programátora k různým union typům, mapováním levé kolejnice Either a dalším hackům. FP-TS totiž při použití standardní funkce map/chain, typově vyžaduje stejný typ chyby v dané flow. Naštěstí existuje řešení jménem W neboli widen/unionise. 
+
+Pokud totiž namísto map/chain použijeme varianty **mapW/chainW**, vidíme již IDE zelené a naprosto správnou typovou notaci. 
+Tedy **E.Either<ErrorType1 | ErrorType2, string>**. Funkce printFirstDataTitle vrací jiný typ chyby(left) než errorType1 a naše pipe stav nyní správně reflektuje. 
+
+Výsledná funkce vypadá nyní takto:
+
+    const result: E.Either <ErrorType1 | ErrorType2, string> = pipe(
+        initClient(),
+        O.mapNullable(printClientName),
+        E.fromOption(() => errorType1('client not found', 'COMMON')),
+        E.map(client => client.data),
+        E.chainW(printFirstDataTitle),
+    )
+
+
+K praktické ukázce dodám, že záměrně jednou používám Either uvnitř řetězené funkce (printFirstDataTitle) a jednou přímo ve scope pipe uvnitř struktury result.  Samozřejmě -  v produkčním kódu by šlo design pofackovat a dát všemu štábní kulturu, 
+mým záměrem ale bylo poukázat na explicitní vyjádření povahy objektů v obou případech. Ať už je Either/Maybe/whatever struktura použita kdekoliv - například právě uvnitř jedné z řetězených funkcí - programátor musí zajet do kolejniček použitím mapování, čímž i při pohledu zvenčí (bez detailnější znalosti struktury fce), jasně deklaruje práci s potenciálně nullable,chybovým, jakýmkoliv stavem.
+Do USB-C prostě kabel od sekačky nenarvete. A každý jouda(funkce) se nemusí pokoušet rozbitou sekačkou zušlechťovat trávník. Stačí na ní jednou nalepit ceduli. Railway orintented programming v praxi.
+
+# Závěrem
+
+Článek máme za sebou. Tentokrát jsme se podívali na Maybe monádu v kombinací s Either monádou. Pokud by si měl čtenář něco odnést, pak je to dle mého myšlenka kolem deklarativního handlingu null a error values. Právě kanonický (obecně přijímaný, chovající dle očekávání) přístup k handlingu a velmi popisné typy, mohou významně omezit chybovost a typové nepřesnosti (či přímo lži) v kódu. 
+
+FP-TS ekosystém navíc nabízí spoustu nástrojů, které jsou s Either a Maybe v symbióze. Existuje knihovna **monocle-ts** pro kompozici a null handling nested objektů. Skvělá je knihovna **io-ts**, která produkuje Either jako výsledek runtime type checku. Existující typy pro shlukování (monoid, sequenceT/S) takových struktur a další využití jejich vlastností - obě monády totiž mají společné předky [(funktor, applicative](https://www.apitree.cz/blog/funkcionalni-programovani-v-typescriptu)...). A také existující jejich varianty pro asynchronní programování. 
+
+To byla malá ochutnávka, a právě asynchronnímu programování se budeme věnovat v příštím díle. 
+
+Takže FP zdar! 
