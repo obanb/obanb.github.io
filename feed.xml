@@ -1,84 +1,628 @@
----
-layout: null
----
 <?xml version="1.0" encoding="utf-8"?>
-{% if page.xsl %}
-  <?xml-stylesheet type="text/xml" href="{{ '/feed.xslt.xml' | absolute_url }}"?>
-{% endif %}
-<feed xmlns="http://www.w3.org/2005/Atom" {% if site.lang %}xml:lang="{{ site.lang }}"{% endif %}>
-  <generator uri="https://jekyllrb.com/" version="{{ jekyll.version }}">Jekyll</generator>
-  <link href="{{ page.url | absolute_url }}" rel="self" type="application/atom+xml" />
-  <link href="{{ '/' | absolute_url }}" rel="alternate" type="text/html" {% if site.lang %}hreflang="{{ site.lang }}" {% endif %}/>
-  <updated>{{ site.time | date_to_xmlschema }}</updated>
-  <id>{{ '/' | absolute_url | xml_escape }}</id>
 
-  {% if site.title %}
-    <title type="html">{{ site.title | smartify | xml_escape }}</title>
-  {% elsif site.name %}
-    <title type="html">{{ site.name | smartify | xml_escape }}</title>
-  {% endif %}
+<feed xmlns="http://www.w3.org/2005/Atom" >
+  <generator uri="https://jekyllrb.com/" version="4.1.0">Jekyll</generator>
+  <link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" />
+  <link href="http://localhost:4000/" rel="alternate" type="text/html" />
+  <updated>2020-06-20T21:34:20+02:00</updated>
+  <id>http://localhost:4000/</id>
 
-  {% if site.description %}
-    <subtitle>{{ site.description | xml_escape }}</subtitle>
-  {% endif %}
+  
+    <title type="html">typed_cz</title>
+  
 
-  {% if site.author %}
-    <author>
-        <name>{{ site.author.name | default: site.author | xml_escape }}</name>
-      {% if site.author.email %}
-        <email>{{ site.author.email | xml_escape }}</email>
-      {% endif %}
-      {% if site.author.uri %}
-        <uri>{{ site.author.uri | xml_escape }}</uri>
-      {% endif %}
-    </author>
-  {% endif %}
+  
+    <subtitle>Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.</subtitle>
+  
 
-  {% assign posts = site.posts | where_exp: "post", "post.draft != true" %}
-  {% for post in posts limit: 10 %}
-    <entry{% if post.lang %}{{" "}}xml:lang="{{ post.lang }}"{% endif %}>
-      <title type="html">{{ post.title | smartify | strip_html | normalize_whitespace | xml_escape }}</title>
-      <link href="{{ post.url | absolute_url }}" rel="alternate" type="text/html" title="{{ post.title | xml_escape }}" />
-      <published>{{ post.date | date_to_xmlschema }}</published>
-      <updated>{{ post.last_modified_at | default: post.date | date_to_xmlschema }}</updated>
-      <id>{{ post.id | absolute_url | xml_escape }}</id>
-      <content type="html" xml:base="{{ post.url | absolute_url | xml_escape }}">{{ post.content | strip | xml_escape }}</content>
+  
 
-      {% assign post_author = post.author | default: post.authors[0] | default: site.author %}
-      {% assign post_author = site.data.authors[post_author] | default: post_author %}
-      {% assign post_author_email = post_author.email | default: nil %}
-      {% assign post_author_uri = post_author.uri | default: nil %}
-      {% assign post_author_name = post_author.name | default: post_author %}
+  
+  
+    <entry>
+      <title type="html">FP-TS 2 - Option</title>
+      <link href="http://localhost:4000/" rel="alternate" type="text/html" title="FP-TS 2 - Option" />
+      <published>2020-06-20T00:00:00+02:00</published>
+      <updated>2020-06-20T00:00:00+02:00</updated>
+      <id>http://localhost:4000/project-2</id>
+      <content type="html" xml:base="http://localhost:4000/">&lt;p&gt;&lt;br /&gt;
+V &lt;a href=&quot;https://www.apitree.cz/blog/fp-ts-either&quot;&gt;minulém díle&lt;/a&gt; jsem se věnoval problému error handlingu za pomocí Either monády. 
+Jestli je TypeScriptu (platí většinou i obecně napříč jazyky) nějaký další vývojářský perpetuum mobile, pak je to ošetřování null/undefined values a návazná problematika - jejich řetězení, zanořování, typová (ne)deklarace.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;V čem je problém?&lt;/strong&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Undefined i null (byť null považuji za více controlled) jsou často velmi vágní ukazatel. Jednou vznikají kontrolovaně jako zamýšlený výsledek komputace, podruhé mimoděk - například jako dotaz na neexistující API, nezinicializovaná instance knihovny, nenalezená data, špatná časová inicializace u asynchronního programování atd.)&lt;/li&gt;
+    &lt;li&gt;Neustálý check null values je poměrně otravný, dává slušný prostor k chybám (“Jéé, já zapomněl otazník a ono to na count of undefined při testech nikdy nespadlo!”) a k alternativním přístupům k null handlingu.&lt;/li&gt;
+    &lt;li&gt;V kódu vzniká velká spousta podmínek (if pejsek then kočička). Nehledě na check hell u nested objektů. Byť v TS existuje Optional chaining/Nullish Coalescing , které problém mohou mírně redukovat.&lt;/li&gt;
+    &lt;li&gt;Často je nutná ruční transformace z null value na propagaci chyby (if !pejsek then throw(‘missing pejsek’), která opět vede k “urob si sám” error šlamastikám.&lt;/li&gt;
+    &lt;li&gt;Kombinace error a null handlingu vede v případě ošetření uvnitř funkcí k nepřehledným strukturám, o to víc v případě funkcionálnějšího přístupu, kdy funkce řetězíme v různých pipes/flows, ale netušíme jaký šelmostroj se uvnitř skrývá. Deklarativnější přístup může při řetězení funkcí působit při nevyužití typů jako jsou například monády, poněkud neprůhledně.&lt;/li&gt;
+    &lt;li&gt;Chybí obecně přijímaný postup pro handling výše zmíněného.&lt;/li&gt;
+    &lt;li&gt;Kombinace různých přístupů (programátorů i technologií) činí z null handlingu rajskou zahradu plnou poletujících bugů.&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Nyní k praktické ukázce. Nejprve tradiční přístup, poté přístup FP-TS.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;interface Client {
+    name: string,
+        data?: {
+            id: number,
+            title ? : string
+        } []
+}
+
+interface ErrorType1{
+    msg:string,
+    type:string
+}
+const errorType1 = (msg: string, type: string) =&amp;gt; ({
+    msg,
+    type
+})
+
+interface ErrorType2{
+    id: number
+    msg:string,
+}
+const errorType2 = (id: number, msg: string) =&amp;gt; ({
+    msg,
+})
+
+
+const initClient = () =&amp;gt; {
+    const client = {
+        name: 'someClient',
+        data: [{
+                id: 1,
+                title: 'data1'
+            },
+            {
+                id: 2,
+                title: undefined
+            },
+
+        ]
+    }
+    return client as Client | undefined; // fejkujeme nespolehlivého clienta pro účel článku
+}
+
+const printClientName = (client ? : Client) =&amp;gt; {
+    if (client) {
+        console.log(client.name);
+        return client;
+    } else {
+        throw errorType1('client not found', 'COMMON');
+    }
+}
+
+const printFirstDataTitle = (clientData: {
+    id: number,
+    title ? : string
+} []) =&amp;gt; {
+    if (clientData &amp;amp;&amp;amp; clientData.length &amp;gt; 0) {
+        const clientDataTitle = clientData[0].title;
+        if(clientDataTitle){
+	        console.log(clientDataTitle );
+	        return clientDataTitle; 
+        }
+    } else {
+        throw errorType2(1, 'clientData error');
+    }
+}
+
+const resultPipe = pipe(
+    initClient(),
+    printClientName,
+    (client =&amp;gt; client.data),
+    printFirstDataTitle
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Ano, kód by se samozřejmě dal strukturovat lépe, ale na druhou stranu poměrně věrně zobrazuje několik neduhů. V několika bodech by bylo snadné vyrobit chybu s chybějícím null checkem, handling erorru není vůbec vidět v typové anotaci/inference, ve finálním řetězu funkcí (pipe) se s errorem bez ohledání implementaci funkcí vůbec nepočítá a celé je to navíc při pohledu na pipe nic neříkající o nebezpečích, které funkce mohou ukrývat.&lt;/p&gt;
+
+&lt;h1 id=&quot;option&quot;&gt;Option&lt;/h1&gt;
+
+&lt;p&gt;Nyní zkusíme variantu FP-TS a jednu z profláklejších monád - Option, občas zvanou jako Maybe.
+A protože jsme si v &lt;a href=&quot;https://www.apitree.cz/blog/fp-ts-either&quot;&gt;minulém článku&lt;/a&gt; ukázali jako pracovat s Either monádou, využijeme rovnou jejich kombinaci.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const initClient = (): O.Option &amp;lt;Client&amp;gt; =&amp;gt; {
+    const client = {
+        name: 'someClient',
+        data: [{
+                id: 1,
+                title: 'data1'
+            },
+            {
+                id: 2,
+                title: undefined
+            },
+
+        ]
+    }
+    return O.fromNullable(client);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Jako první jsem si pomocí &lt;strong&gt;fromNullable&lt;/strong&gt; vytvořil z undefined/null value nový typ: Option monádu: 
+typová anotace vypadá jako &lt;strong&gt;O.Option &amp;lt; Client &amp;gt;&lt;/strong&gt; a v debugu by se nám objevil jevil jako &lt;strong&gt;{_tag: “Some”, value: Object}&lt;/strong&gt;, případně jako &lt;strong&gt;{_tag: “None”}&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;A v &lt;strong&gt;{_tag: “None”}&lt;/strong&gt; je právě ten fígl. Zaprvé - v Option monádě nadále nepracujeme s undefined nebo null value, ale speciálním objektem otagovaným jako None, přičemž jakýkoliv další map/chain volaný nad takovýmto objektem zkontroluje zda není otagovám jako None a rovnou posílá výsledek do kolejnice pro empty value. Podobně jako Either pracuje s left, pracuje i Maybe s tagem none.&lt;/p&gt;
+
+&lt;p&gt;Jako další si vydefinujeme naší funkcí pro získání name z klienta, ale naschvál ji ponecháme bez ošetření, abychom si ukázali jak takovou funkci ošetříme obalením Maybe monádou “zvenčí”.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const printClientName = (client: Client) =&amp;gt; {
+    console.log(client.name);
+    return client;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;OK. Vytvoříme si první kousky pipe z našich dvou funkcí. Pro přehled deklaruji typ předem.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const result: O.Option&amp;lt;Client&amp;gt; = pipe(
+    initClient(),
+    O.map(printClientName),
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Výsledek je tedy entita, která v prvním kroku ve funkci initClientFp a vrátí Option monádu - value nebo None.
+Následně použijeme funkci map, která jako první argument příjme naší Option monádu a jako druhý funkci.
+Interně prověří zda je příchozí monáda None, a pokud ano, jede po prázdné kolejničce a funkci printClientNameFp nikdy nevykoná.&lt;/p&gt;
+
+&lt;p&gt;Popojedeme dál. V původních funkcích jsem “ručně” handloval error uvnitř scope, nyní si ukážeme jak ohandlovat prázdnout value zvenčí a propojit dvě monády přechodem mezi Option a Either. Pokud Option vrátí None, Either aktivuje svou levou větev a od programátora očekává chybovou událost.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const result: E.Either&amp;lt;ErrorType1,Client&amp;gt; = pipe(
+    initClient(),
+    O.mapNullable(printClientName),
+    E.fromOption(() =&amp;gt; errorType1('client not found', 'COMMON'))
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Typ se nám změnil na  &lt;strong&gt;E.Either&amp;lt;ErrorType1,Client&amp;gt;&lt;/strong&gt;. Jasně deklarujeme, že máme co dočinění s možnou error value a už při čtení pipe, bez znalosti implementace funkcí, jasně vidíme že máme co dočinění s null/error handlingem.&lt;/p&gt;
+
+&lt;p&gt;Nyní přepíšeme naší poslední funkcí, která musí nakouknout do prvního prvku pole (pokud existuje a pokud má alespoň jeden item), v prvku najít title  a ten vytisknout. V Případě že nenajde chybejici data, musí vrátit chybu a transformovat se v Either.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const printFirstDataTitle: E.Either&amp;lt;ErrorType2,string&amp;gt; = (clientData: {
+    id: number,
+    title ? : string
+} []) =&amp;gt; pipe(
+    O.fromNullable(clientData),
+    O.chain((data) =&amp;gt; A.lookup(0, data)),
+    O.mapNullable((item) =&amp;gt; item.title),
+    O.map(title =&amp;gt; {
+        console.log(title);
+        return title;
+    }),
+    E.fromOption(() =&amp;gt; errorType2(1,'clientData error'))
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Chain nebo flatmap sme si vysvětlovali v minulém díle, ale pro jistotu zopakuji - chain vezme data z monády (O.fromNullable(clientData)) a aplikuje na ně funkci, která také vrací monádu (funkce A.lookup vrací Option&amp;lt; itemZPole &amp;gt;) a  narozdíl od map  už výsledek znovu nebalí sama do sebe - nevzniká tak Option uvnitř Option ala &lt;strong&gt;Option&amp;lt;Option&amp;lt; string»&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Pro úplnost obecnější pohled - map umožňuje mapování mezi kategoriemi (viz. funktor) - tzn. rozbalí value z wrapperu a po provedení funkce data do wrapperu znovu zabalí. Flatmap/chain již value obalovat nemusí, protože sama funkce prováděná nad value vrací výsledek ve wrapperu (monádě např.).&lt;/p&gt;
+
+&lt;p&gt;Pojďme sestavit naší závěrečnou pipe.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const result = pipe(
+    initClient(),
+    O.mapNullable(printClientName),
+    E.fromOption(() =&amp;gt; errorType1('client not found', 'COMMON')),
+    E.map(client =&amp;gt; client.data),
+    E.chain(printFirstDataTitle) // printFirstDataTitle vrací Either&amp;lt;ErrorType2, string&amp;gt;,
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Bác. Něco ošklivého se přihodilo. IDE vrátilo ošklivé červené s hláškou tohoto stříhu: &lt;strong&gt;Type ‘Left&amp;lt; ErrorType1 &amp;gt;’ is not assignable to type ‘Left&amp;lt; ErrorType2 &amp;gt;&lt;/strong&gt;’.&lt;/p&gt;
+
+&lt;p&gt;Co se právě přihodilo? Jedná se o neduh v chování FP-TS, který ve starších verzích knihovny poměrně komplikoval vývoj a nutil programátora k různým union typům, mapováním levé kolejnice Either a dalším hackům. FP-TS totiž při použití standardní funkce map/chain, typově vyžaduje stejný typ chyby v dané flow. Naštěstí existuje řešení jménem W neboli widen/unionise.&lt;/p&gt;
+
+&lt;p&gt;Pokud totiž namísto map/chain použijeme varianty &lt;strong&gt;mapW/chainW&lt;/strong&gt;, vidíme již IDE zelené a naprosto správnou typovou notaci. 
+Tedy &lt;strong&gt;E.Either&amp;lt;ErrorType1 | ErrorType2, string&amp;gt;&lt;/strong&gt;. Funkce printFirstDataTitle vrací jiný typ chyby(left) než errorType1 a naše pipe stav nyní správně reflektuje.&lt;/p&gt;
+
+&lt;p&gt;Výsledná funkce vypadá nyní takto:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const result: E.Either &amp;lt;ErrorType1 | ErrorType2, string&amp;gt; = pipe(
+    initClient(),
+    O.mapNullable(printClientName),
+    E.fromOption(() =&amp;gt; errorType1('client not found', 'COMMON')),
+    E.map(client =&amp;gt; client.data),
+    E.chainW(printFirstDataTitle),
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;K praktické ukázce dodám, že záměrně jednou používám Either uvnitř řetězené funkce (printFirstDataTitle) a jednou přímo ve scope pipe uvnitř struktury result.  Samozřejmě -  v produkčním kódu by šlo design pofackovat a dát všemu štábní kulturu, 
+mým záměrem ale bylo poukázat na explicitní vyjádření povahy objektů v obou případech. Ať už je Either/Maybe/whatever struktura použita kdekoliv - například právě uvnitř jedné z řetězených funkcí - programátor musí zajet do kolejniček použitím mapování, čímž i při pohledu zvenčí (bez detailnější znalosti struktury fce), jasně deklaruje práci s potenciálně nullable,chybovým, jakýmkoliv stavem.
+Do USB-C prostě kabel od sekačky nenarvete. A každý jouda(funkce) se nemusí pokoušet rozbitou sekačkou zušlechťovat trávník. Stačí na ní jednou nalepit ceduli. Railway orintented programming v praxi.&lt;/p&gt;
+
+&lt;h1 id=&quot;závěrem&quot;&gt;Závěrem&lt;/h1&gt;
+
+&lt;p&gt;Článek máme za sebou. Tentokrát jsme se podívali na Maybe monádu v kombinací s Either monádou. Pokud by si měl čtenář něco odnést, pak je to dle mého myšlenka kolem deklarativního handlingu null a error values. Právě kanonický (obecně přijímaný, chovající dle očekávání) přístup k handlingu a velmi popisné typy, mohou významně omezit chybovost a typové nepřesnosti (či přímo lži) v kódu.&lt;/p&gt;
+
+&lt;p&gt;FP-TS ekosystém navíc nabízí spoustu nástrojů, které jsou s Either a Maybe v symbióze. Existuje knihovna &lt;strong&gt;monocle-ts&lt;/strong&gt; pro kompozici a null handling nested objektů. Skvělá je knihovna &lt;strong&gt;io-ts&lt;/strong&gt;, která produkuje Either jako výsledek runtime type checku. Existující typy pro shlukování (monoid, sequenceT/S) takových struktur a další využití jejich vlastností - obě monády totiž mají společné předky &lt;a href=&quot;https://www.apitree.cz/blog/funkcionalni-programovani-v-typescriptu&quot;&gt;(funktor, applicative&lt;/a&gt;…). A také existující jejich varianty pro asynchronní programování.&lt;/p&gt;
+
+&lt;p&gt;To byla malá ochutnávka, a právě asynchronnímu programování se budeme věnovat v příštím díle.&lt;/p&gt;
+
+&lt;p&gt;Takže FP zdar!&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
 
       <author>
-          <name>{{ post_author_name | default: "" | xml_escape }}</name>
-        {% if post_author_email %}
-          <email>{{ post_author_email | xml_escape }}</email>
-        {% endif %}
-        {% if post_author_uri %}
-          <uri>{{ post_author_uri | xml_escape }}</uri>
-        {% endif %}
+          <name></name>
+        
+        
       </author>
 
-      {% if post.category %}
-        <category term="{{ post.category | xml_escape }}" />
-      {% endif %}
+      
+        <category term="TypeScript, NodeJS, funkcionální programování" />
+      
 
-      {% for tag in post.tags %}
-        <category term="{{ tag | xml_escape }}" />
-      {% endfor %}
+      
 
-      {% if post.excerpt and post.excerpt != empty %}
-        <summary type="html">{{ post.excerpt | strip_html | normalize_whitespace | xml_escape }}</summary>
-      {% endif %}
+      
+        <summary type="html">V minulém díle jsem se věnoval problému error handlingu za pomocí Either monády. Jestli je TypeScriptu (platí většinou i obecně napříč jazyky) nějaký další vývojářský perpetuum mobile, pak je to ošetřování null/undefined values a návazná problematika - jejich řetězení, zanořování, typová (ne)deklarace.</summary>
+      
 
-      {% assign post_image = post.image.path | default: post.image %}
-      {% if post_image %}
-        {% unless post_image contains "://" %}
-          {% assign post_image = post_image | absolute_url | xml_escape  %}
-        {% endunless %}
-        <media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{{ post_image }}" />
-      {% endif %}
+      
+      
     </entry>
-  {% endfor %}
+  
+    <entry>
+      <title type="html">FP-TS 1 - Either</title>
+      <link href="http://localhost:4000/" rel="alternate" type="text/html" title="FP-TS 1 - Either" />
+      <published>2020-06-16T00:00:00+02:00</published>
+      <updated>2020-06-16T00:00:00+02:00</updated>
+      <id>http://localhost:4000/project-1</id>
+      <content type="html" xml:base="http://localhost:4000/">&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Vítám čtenáře u prvního dílu ApiTree seriálu o funkcionálním programování v TypeScriptu, který bude (mimo jiné) postupně představovat
+vybrané featury knihoven z rodiny FP-TS. Lehký &lt;a href=&quot;https://www.apitree.cz/blog/funkcionalni-programovani-v-typescriptu&quot;&gt;úvod&lt;/a&gt; do FP máme za sebou, vrhněme se tedy
+na praktičtější implementaci.&lt;/p&gt;
+
+&lt;p&gt;Jsou dva typy problémů, na které programátor naráží neustále. Error handling a null values. 
+V tomto povídání se chci zaměřit na error handling v TypeScriptu a jeho, dle mého, vylepšenou alternativu v pojetí knihovny FP-TS.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;V čem je problém?&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Pokud programátor explicitně nedefinuje v typové anotaci - dokáže s “pomocí” TS poměrně úspěšně zakrýt implementaci error handlingu uvnitř struktury.&lt;/li&gt;
+    &lt;li&gt;TypeScript nijak nevynucuje typovou anotaci takové struktury a ani nemusí správně strukturu pochopit pro type inference.&lt;/li&gt;
+    &lt;li&gt;Každý programátor má svobodu (často bohužel) implementovat error handling po svém. Jednou chybu propaguje skrze throw, jednou jen loguje, jindy zase zapisuje do databázové entity. Takové chování často vede k problémům při kompozici funkcí.&lt;/li&gt;
+    &lt;li&gt;Různé typy chyb a jejich handlery spolu často nesouzní.&lt;/li&gt;
+    &lt;li&gt;Na ošetření chyby se často úplně zapomene. Hello unhandled promise rejection :-)&lt;/li&gt;
+    &lt;li&gt;Funkcionální přístup je chyby přímo nevyhazovat, ale kontrolovaně zprostředkovat zachycené.&lt;/li&gt;
+    &lt;li&gt;Pokud každou chybu programátor uvnitř funkce handluje po svém, rozhoduje o nakládání s chybou předčasně.&lt;/li&gt;
+    &lt;li&gt;Celé je to punk, který vede k nárůstu chyb či problému při jejich logování/dohledávání!&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Praktická ukázka záměrně neoptimálního error handlingu v TS.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const getSomeDataThrow = (data: string) =&amp;gt; {
+  try {
+    const result = fakeDataProducer(data);
+    return result.someData;
+  } catch (e) {
+    throw new Error(e);
+  }
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Kód je samozřejmě osekaný na minimum, ale problém je už při typové anotaci. TypeScript bez explicitního označení vrátí string, což může způsobit poměrně nepříjemné překvapení při pohledu zvenčí. Funkce nikterak neproklamuje, že je potenciálně nebezpečná a při kompozici více takovýchto entit, problém vyvstává násobně.&lt;/p&gt;
+
+&lt;p&gt;Pokračujeme dál.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const getSomeDataLog = (data: string) =&amp;gt; {
+  try {
+    const result = fakeDataProducer(data);
+    return result.someData;
+  } catch (e) {
+    db.someEntity.errors.push(e);
+    console.log(JSON.stringify(e));
+  }
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Stejný problém v typové anotaci, funkce údajně vrací string a tentokrát nedochází k throw erroru, ale k zalogování a zápisu do db entity. Ano, typ se dá explicitně vyjádřit, ale svoboda je zrádná.&lt;/p&gt;
+
+&lt;p&gt;Pokud obě funkce složíme do nějaké obdoby pipe/flow, obloha vypadá sluníčkově.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const result = pipe(
+  'some string data',
+  getSomeDataThrow,
+  getSomeDataLog,
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Pod kapotou se ale pipe nyní může chovat nepředvídatelně. Přidejme asynchronní kód a na unhandled errory máme zaděláno.&lt;/p&gt;
+
+&lt;h1 id=&quot;either-monáda&quot;&gt;Either monáda&lt;/h1&gt;
+
+&lt;p&gt;V TypeScriptu to ale dokážeme lépe, funkcionálně a čistě.&lt;/p&gt;
+
+&lt;p&gt;Nejprve trocha teorie, ale opravdu jen trocha s odkazem na můj první &lt;a href=&quot;https://www.apitree.cz/blog/funkcionalni-programovani-v-typescriptu&quot;&gt;článek&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Proč je Either monádou?&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Představme si strukturu, která dokáže přijmout data v obálce, rozbalit si její obsah, aplikovat na něj funkci, a výsledek do obálky zpět zabalit. Máme funktor.
+Strukturu upgradujme a umožněme ji přijmout v obálce nejen value, ale funkci, kterou následně aplikuje na data z jiné obálky. Máme applicative funktor. Zhruba.
+Přidejme schopnost balit data z obálky do funkce, která vrací data v jiné obálce - nazvěme ji například flatmap nebo chain, a blížíme se k monádě.
+Abstraktní? Rozhodně. Pro představu před praktickou ukázkou dostačující. Monáda je pro nás zatím nějaká algebraická struktura, která dokáže poměrně komplexně manipulovat s jinou podobnou strukturou.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Kolejnice&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Either je tedy monádou, wrapperem nad daty, který dokáže pracovat s wrapperem podobného ražení, případně data zabalit do wrapperu či rozbalit.
+Typické pro monádu typu Either je (resp. technika, kterou Either implementuje) je tzv. railway oriented programming - aneb programování v kolejničkách. Levá kolejnička veze vagón s errory, pravá zase s výsledky. Either&amp;lt;Error, Result&amp;gt;.&lt;/p&gt;
+
+&lt;p&gt;Pojďme si tedy přepsat předchozí kód. Nejprve ve verzi, kdy si Either kolejnice explicitně nadefinujeme a trochu si zaprasíme. Poté v rafinovanější build in formě.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const getFakeDataEither = (data: string): E.Either&amp;lt;Error, string&amp;gt; =&amp;gt; {
+  try {
+    const result = fakeDataProducer(data);
+    return E.right(result.someData);
+  } catch (e) {
+    return E.left(Error(e));
+  }
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Jak je z kódu zřejmé. V případě že nedojde k zachycení chyby v try větvi, zabalíme hodnotu do pravé (té happy day) kolejnice. V případě že chybu zachytíme, pojedeme po kolejnici levé. Tadá, právě jsme vytvořili Either monádu, která jasně deklaruje chybový i nechybový scénář.&lt;/p&gt;
+
+&lt;p&gt;Pojďme nyní napsat kód správně a využít předpřipravenou funkci vhodnou pro náš scénář.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const getFakeDataEither = (data: string): E.Either&amp;lt;Error, string&amp;gt; =&amp;gt; {
+  return (
+    E.tryCatch &amp;lt; Error,string &amp;gt;(() =&amp;gt; fakeDataProducer(data).someData, (e) =&amp;gt; Error(JSON.stringify(e)))
+  );
+};
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Využili jsme vestavěnou tryCatch funkci, která vrací Either monádu se stringem coby kladným výsledkem a Errorem coby chybovou hodnotou. Jasně deklarujeme co je naším záměrem, potenciální chybovost funkce, a type inference funguje dle očekávání (typ deklaruji jen pro přehled).&lt;/p&gt;
+
+&lt;p&gt;Dobrá, máme tedy monádu. Co ale dál? Co takhle náš výsledný string rozšířit v případě, že se vykonání funkce povedlo? Jak ale na to, vždyť máme data zabalena v nějakém pochybném wrapperu? Použijme funkci map.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const eitherTest: E.Either&amp;lt;Error, string&amp;gt; = pipe(
+  &quot;some string data&quot;,
+  getFakeDataEither,
+  E.map((value) =&amp;gt; `${value} updated`)
+);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Jak vidno, pro zachování našich kolejnic a update stringu, stačí jediné - využít vlastnost (odvozenou z funktoru) map, která je (jak jsem již výše popisoval) schopna rozbalit výsledek getFakeData, na výsledku provolat deklarovanou funkci s updatem value a data znovu do obálky zabalit. V případě, že by při volání getFakeData nastala chyba, následující funkce se nikdy nevykoná a monáda v levé branch podrží error.&lt;/p&gt;
+
+&lt;p&gt;Co se ale stane, pokud sama řetězená funkce vrací jako návratovou hodnotu také monádu? Případ je to častý a i na něj máme řešení. Flatmap neboli chain.&lt;/p&gt;
+
+&lt;p&gt;Nejprve předvedu chybnou variantu.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const wrongEitherTest = pipe(&quot;some string data&quot;, getFakeDataEither, E.map(getFakeDataEither));
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Jaký typ nám následující funkce vrací? E.Either&amp;lt;Error,  E.Either&amp;lt;Error,  string»
+Huh. Obálka v obálce. A nyní chain.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; const niceEitherTest = pipe(&quot;some string data&quot;, getFakeDataEither, E.chain(getFakeDataEither));
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Výsledným typem jest náš nádherný E.Either&amp;lt;Error,  string&amp;gt;&lt;/p&gt;
+
+&lt;p&gt;Prozatím posledním krokem bude data z obálky vytáhnout. Frontendisté jsou banda nerudná (něco jako trpaslíci) a za návratovou hodnotu z API typu Object {_tag: “Right”, right: “some string data”}, by nás jistě vykostila.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const eitherFold: string = pipe(
+  &quot;some string data&quot;,
+  getFakeDataEither,
+  E.chain(getFakeDataEither),
+  E.fold(
+    (e) =&amp;gt; JSON.stringify(e),
+    (res) =&amp;gt; res
+  )
+);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Sic trochu kostrbatě, ale rozbalený string je na světě. Obecně je však ideální provádět transformace nad daty v obálkách a jejich rozbalení ponechávat na výstupy aplikace. Jak z hlediska znovupoužitelnosti, tak z pohledu handlingu side efektů.&lt;/p&gt;
+
+&lt;h1 id=&quot;závěrem&quot;&gt;Závěrem&lt;/h1&gt;
+
+&lt;p&gt;Právě jsme v mírně neučesané lite formě použili Either monádu s error handlingem (stejně tak ho lze využít například pro validace). API Either je samozřejmě rozsáhlejší, ale pro základní pochopení problematiky je příklad doufám dostačující.
+Samotná problematika řetězení a skládání algebraických struktur je komplexnější, FP-TS poskytuje další transformační funkce - například pro přechod z jednoho typu monády do jiného(například Option &amp;gt; Either), různé vychytávky pro rozbalení values, asynchronní programování (Task, TaskEither) a nástroje pro všemožné iterace a ohebnou manipulaci s objekty podobného typu. O tom ale zase v dalších dílech.&lt;/p&gt;
+
+&lt;p&gt;Funkcionálnímu TypeScriptu zdar!&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      <author>
+          <name></name>
+        
+        
+      </author>
+
+      
+        <category term="TypeScript, NodeJS, FP-TS, funkcionální programování, Either, Maybe, Option" />
+      
+
+      
+
+      
+        <summary type="html"></summary>
+      
+
+      
+      
+    </entry>
+  
+    <entry>
+      <title type="html">Funkcionální programování v TypeScriptu</title>
+      <link href="http://localhost:4000/" rel="alternate" type="text/html" title="Funkcionální programování v TypeScriptu" />
+      <published>2020-06-16T00:00:00+02:00</published>
+      <updated>2020-06-16T00:00:00+02:00</updated>
+      <id>http://localhost:4000/project-0</id>
+      <content type="html" xml:base="http://localhost:4000/">&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Za poslední dva roky jsme u nás ve firmě (backend psaný kombinací Node.js a TypeScriptu) začali pokukovat po jakémsi semi-funkcionálním pojetí psaní kódu.&lt;/p&gt;
+
+&lt;p&gt;Z části nás pravděpodobně zasáhla vlna funkcionálního hype, kterou si troufám tvrdit, do toho opravdového mainstreamu začala tlačit stále mohutnější React komunita. A z části to zkrátka dávalo v ekosystému Node.js, TypeScriptu, GraphQL a microservices smysl.&lt;/p&gt;
+
+&lt;p&gt;Podotknu, že valná většina týmu pochází ze světa těch klasických enterprise technologií ala Java/Spring, typicky využívaných spíše v kontextu OOP, DI apod.&lt;/p&gt;
+
+&lt;p&gt;Výraz  &lt;em&gt;funkcionálnější styl&lt;/em&gt;  psaní kódu píší záměrně, protože se možná nejedná o (pro namyšleného akademika!) striktně akurátní FP ala Haskell (?). Řekněme ale, že se na pomyslné křivce funkcionálního TypeScriptu dokážeme pohybovat od helper knihoven (Ramda, Lodash..) až po komplexní systém typu fp-ts.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Co vlastně ale to funkcionální znamená? A jak si vlastně takový styl psaní/myšlení vydefinovat?&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Nejprve ale malý, zjednodušený slovníček pojmů:&lt;/em&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;strong&gt;algebraická struktura&lt;/strong&gt;  - kanonický objekt s různou komplexitou a předepsaným chováním (laws) - struktury jako monoid, funktor, applicative - představme si jako předpis pro objekt s očekávaným chováním, svého druhu design pattern ve FP&lt;/li&gt;
+    &lt;li&gt;&lt;strong&gt;kategorie&lt;/strong&gt;  - objekt a morfismus - v TypeScriptu lze vyjádřit morfismus jako f: A =&amp;gt; B, kdy f vyjadřuje morfismus z typu A do typu B - v zásadě tedy pár objekt (typ): funkce&lt;/li&gt;
+    &lt;li&gt;&lt;strong&gt;HKT&lt;/strong&gt;  - higher kinded types - typový parametr, který jako argument přijímá jiný typ ve smyslu - generický (předem neznámý) typ dokáže přijmout jiný typ jako parametr - HKT nejsou součástí TS by default - někdy potřebujeme provádět operace nad generickou strukturou a onu neznámou strukturu osadit zatím neznámým typem&lt;/li&gt;
+    &lt;li&gt;&lt;strong&gt;currying&lt;/strong&gt;  -  &lt;T&gt;(a,b,c) =&amp;gt; T aka  &lt;T&gt;  (a) =&amp;gt; (b) =&amp;gt; c =&amp;gt; T&lt;/T&gt;&lt;/T&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;strong&gt;partial application&lt;/strong&gt;  -  &lt;T&gt;(a,b,c) =&amp;gt; T aka  &lt;T&gt;  (a, b) =&amp;gt; c =&amp;gt; T&lt;/T&gt;&lt;/T&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;strong&gt;funktor&lt;/strong&gt;  - pro začátek si představme algebraickou strukturu, která je schopná převzít strukturu jinou, rozbalit její obsah, aplikovat na něj funkci (map) a výsledek znovu zabalit do nějaké obálky - dokáže provést mapování mezi kategoriemi&lt;/li&gt;
+    &lt;li&gt;&lt;strong&gt;monáda&lt;/strong&gt;  - komplexnější algebraická struktura než funktor - oproti funktoru dokáže například aplikovat na data v obálce funkci ukrytou v další obálce&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Pokusím se vyhnout akademickým popisům z Wikipedie. To, že je monáda monoid v kategorii endofunktorů, ví přece každý lojza od PHP po Angular :-) . Vynasnažím se tedy podělit o pár poznámek z praxe (nikoliv definici funkcionálního programování), a vyhnout se frázím typu “deklarativní vs..”, protože deklarativní je dnes zkrátka kde co.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Více přemýšlíme o strukturách, které s daty manipulují, nežli o datech jako takových&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Pokusím se načrtnout jednoduchý příklad, je ale třeba si uvědomit, že se jedná o kousek ilustrativní, protože jádro nad přemýšlení o FP strukturách může být o level abstraktnější - ve strukturách algebraických.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;interface Washable {
+  wash: () =&amp;gt; ...,
+  clean: () =&amp;gt; ...,
+}
+
+interface Openable {
+  open: () =&amp;gt; ...,
+  close: () =&amp;gt; ...,
+}
+
+const vehicle: Washable &amp;amp; Openable = {
+  wash: () =&amp;gt; ...,
+  clean: () =&amp;gt; ...,
+  open: () =&amp;gt; ...,
+  close: () =&amp;gt; ...,
+}
+
+const table: Washable= {
+  wash: () =&amp;gt; ...,
+  clean: () =&amp;gt; ...,
+}
+
+const tableWithDoors: Washable &amp;amp; Openable = {
+  wash: () =&amp;gt; ...,
+  clean: () =&amp;gt; ...,
+  open: () =&amp;gt; ...,
+  close: () =&amp;gt; ...,
+}
+
+const openAndWash = (entity: Washable &amp;amp; Openable) = {
+  return entity.open().then(res =&amp;gt; res.wash());
+}
+
+openAndWash(vehicle); 
+openAndWash(tableWithDoors); 
+
+// bad
+openAndWash(table);
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Jak je z obrázku patrné, funkci openAndWash nezajíma zda otevírá dveře u vozidla nebo od stolku, podstatná je pouze spolehlivost struktury - každá Washable struktura je schopná aplikovat clean. Stejně jako je funktor schopný vzít libovolná data z wrapperu, aplikovat na ně funkci a znovu je do obálky zabalit. A to je kánon.&lt;/p&gt;
+
+&lt;p&gt;Ona dělící čára se může zdát nepatrná, ale přemýšlet “data agnostic” dává řádově větší smysl ve chvíli, kdy se začneme zabývat strukturou abstraktnější, která vůbec neimplikuje povahu dat, ale nabízí jen různé způsoby manipulace s jinou strukturou.&lt;/p&gt;
+
+&lt;p&gt;Pokud si totiž za typem Washable představíme právě strukturu typu funktor - která je stejně jako Washable schopná manipulovat s daty skrze očekávatelný pattern, dostaneme se o něco blíž jádru pudla.&lt;/p&gt;
+
+&lt;p&gt;O algebraických strukturách (funktory, monády) a komplexnějších typech si povíme v nějakém příštím blogu. Poselství je však závěrem následující: funkcionálně naladěný programátor více než o datech přemýšlí o vztahu mezi strukturami, které s daty manipulují.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Řetězíme, řetězíme!&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const cleanMyCar = &amp;lt;A&amp;gt;(car:A) =&amp;gt; pipe(
+    car,
+    openDoor,
+    cleanDoor,
+    closeDoor,
+    cleanWindow,
+    (car) =&amp;gt; `${car} is now clean!`
+)
+​
+const cleanMyCar = &amp;lt;A&amp;gt;(car:A) =&amp;gt; flow(
+    openDoor,
+    cleanDoor,
+    closeDoor,
+    cleanWindow,
+    (car) =&amp;gt; (`${car} is now clean!`)
+)(car)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Obrázek je poměrně popisný - jestli je pro FP něco (nejen) vizuálně typické, je to řetězení funkcí do postupně navazujícího celku či skládání jednodušších funkcí do komplexnějších.&lt;/p&gt;
+
+&lt;p&gt;Využití různých pipe se může zdát zaměnitelné s klasickou deklaraci proměnných, všiml jsem si ale že vede (navádí, přímo neimplikuje) k následujícímu:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;strong&gt;Vhodnější pojmenovávaní funkcí&lt;/strong&gt;  - řetězené funkce přímo volají po přesném a popisném pojmenování&lt;/li&gt;
+    &lt;li&gt;&lt;strong&gt;Kratší funkce a jednodušší funkce&lt;/strong&gt;  - řetězené funkce v kombinaci s pojmenováním volají o jednom jediném účelu (single responsibility principle / single purpose function) - žádné víceúčelové master funkce&lt;/li&gt;
+    &lt;li&gt;Zápis je přehledný a jasně deklaruje flow událostí&lt;/li&gt;
+    &lt;li&gt;Funkce jsou v JS/TS tzv.  &lt;strong&gt;first class objekty&lt;/strong&gt;  - je možné je využít jako návratového hodnoty i parametry jiných funkcí - což je v kombinaci s curryingem či partial application, velmi komplexní nástroj pro flexibilní řetězení&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;composition-over-inheritance&quot;&gt;Composition over inheritance&lt;/h3&gt;
+
+&lt;p&gt;Pradávná mantra neplatí jistě jen pro FP, ale opakování je matkou moudrosti. Skládáme, protínáme, vyjímáme, nedědíme. Komplexnější funkce vznikají kompozicí samostatně testovatelných jednodušších celků.  &lt;strong&gt;Netvoříme božské monolity, ale variabilní kousky stavebnice.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;const postService  = &amp;lt;A,B,C&amp;gt;() =&amp;gt; ({
+  ...withSendMessage,
+  ...withCreateMessage,
+  ...withReadMessage,
+  ...withListItems,
+  sayHello: () =&amp;gt; 'hello! :-)'
+})
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;a-kde-jsou-co-sakra-ty-monády&quot;&gt;A kde jsou co sakra ty monády?!&lt;/h3&gt;
+
+&lt;p&gt;Vypíchl jsem tři z mého pohledu zásadní body pro přemýšlení o funkcionálnějším stylu programování, aniž bych záměrně zabrousil přímo do komplexnějšího světa higher kinded typů a implementací struktur jako jsou monády.&lt;/p&gt;
+
+&lt;p&gt;Hlubiny TypeScriptu jsou ale mnohem barevnější, než by se mohlo na první pohled zdát a v dalších článcích si povíme něco o nástrojích, které takové programování umožňují na úrovni mnohdy komplexnější než u jazyků proklamovaných jako funkcionálních (např. Elm bez podpory HKT).&lt;/p&gt;
+
+&lt;p&gt;Funkcionální JavaScript totiž nemusí být jen lambda, map, reduce a filter. Takže někdy příště o FP-TS, higher kinded typech, funktorech, monádách a typových třídách, side efektech, error handlingu a asynchronním programování, protože právě tam někde se nachází ono příslovečné “Heuréka!”.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;P.S. Autor nepíše na ledničku vzkazy v Haskellu a vyhrazuje si právo mírného zkreslení matematických pojmů apod.&lt;/em&gt;&lt;/p&gt;</content>
+
+      
+      
+      
+      
+      
+
+      <author>
+          <name></name>
+        
+        
+      </author>
+
+      
+        <category term="TypeScript, NodeJS, FP-TS, funkcionální programování" />
+      
+
+      
+
+      
+        <summary type="html"></summary>
+      
+
+      
+      
+    </entry>
+  
 </feed>
