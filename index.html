@@ -3,7 +3,7 @@
     <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>FP-TS 2 - Option</title>
+    <title>FP-TS 3 - Task/TaskEither</title>
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.">
     <meta name="keywords" content="your keywords, separated by commas" />
@@ -94,18 +94,24 @@
                 
                     <div class="col-sm-4 portfolio-item text-center">
                         <a href="#portfolioModal-1" class="portfolio-link" data-toggle="modal">
-			    <h3> FP-TS 2 - Option </h3>	
+			    <h3> FP-TS 3 - Task/TaskEither </h3>	
                         </a>
                     </div>
                 
                     <div class="col-sm-4 portfolio-item text-center">
                         <a href="#portfolioModal-2" class="portfolio-link" data-toggle="modal">
-			    <h3> FP-TS 1 - Either </h3>	
+			    <h3> FP-TS 2 - Option </h3>	
                         </a>
                     </div>
                 
                     <div class="col-sm-4 portfolio-item text-center">
                         <a href="#portfolioModal-3" class="portfolio-link" data-toggle="modal">
+			    <h3> FP-TS 1 - Either </h3>	
+                        </a>
+                    </div>
+                
+                    <div class="col-sm-4 portfolio-item text-center">
+                        <a href="#portfolioModal-4" class="portfolio-link" data-toggle="modal">
 			    <h3> Funkcionální programování v TypeScriptu </h3>	
                         </a>
                     </div>
@@ -139,7 +145,7 @@
         <div class="footer-above">
             <div class="container">
                 <div class="row">
-                    <div class="footer-col col-md-4">
+                    <div class="footer-col col-md-5">
                         <h3></h3>
                         <p>
                             
@@ -147,33 +153,10 @@
 		                    
                         </p>
                     </div>
-                    <div class="footer-col col-md-4">
-                        <h3>média</h3>
-                        <ul class="list-inline">
-                            
-                            <li>
-                                <a href="http://twitter.com/jekyllrb" class="btn-social btn-outline"><i class="fa fa-fw fa-twitter"></i></a>
-                            </li>
-		                    
-                            <li>
-                                <a href="" class="btn-social btn-outline"><i class="fa fa-fw fa-facebook"></i></a>
-                            </li>
-		                    
-                            <li>
-                                <a href="http://stackoverflow.com/questions/tagged/jekyll" class="btn-social btn-outline"><i class="fa fa-fw fa-stack-overflow"></i></a>
-                            </li>
-		                    
-                            <li>
-                                <a href="http://bitbucket.org/jekyll" class="btn-social btn-outline"><i class="fa fa-fw fa-bitbucket"></i></a>
-                            </li>
-		                    
-                            <li>
-                                <a href="http://github.com/jekyll" class="btn-social btn-outline"><i class="fa fa-fw fa-github"></i></a>
-                            </li>
-		                    
-                        </ul>
+                    <div class="footer-col col-md-2">
+                      
                     </div>
-                    <div class="footer-col col-md-4">
+                    <div class="footer-col col-md-5">
                         <h3></h3>
                         <p><a href="http://www.apitree.cz/blog">apitree.cz/blog</a></p>
                     </div>
@@ -208,6 +191,232 @@
                     </div>
                 </div>
             </div>
+ <h2>FP-TS 3 - Task/TaskEither </h2>
+<div class="container">
+	<div class="col-lg-12 text-left"><p><p><br />
+V předchozích článcích seriálu jsem psal o dvou obecně nejznámějších monádách - <a href="https://www.apitree.cz/blog/fp-ts-either">Either</a> a Option. Nejednoho čtenáře jistě napadlo - a je to logicky častý use case - zda existují i “monadic” varianty pro asynchronní programování? Odpověď je ano, byť nestačí do monády poslat promise, dvakrát otčenáš a čekat na data.</p>
+
+<p>Za 1.) je nutno akceptovat zapečené chování TS/JS u asynchronního kódu a jeho vlastnosti.
+Jakákoliv struktura, o které si budeme povídat, stále podléhá jednoduchému zákonu: jakmile je asychronní funkce inicializována, je její běh vyjmut z běžného toku programu a lze si jej představit jako v imaginární větvi, oddělené od synchronního světa zbytku kódu. Tento fakt FP-TS žádným hackem neobchází, ale dává programátorům do rukou struktury, které umí podobné funkce/objekty řetězit a mapovat.</p>
+
+<p>Pro ilustraci:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">asyncResult</span> <span class="o">=</span> <span class="k">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>  
+	<span class="k">return</span> <span class="k">await</span> <span class="nx">Something</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Pokud si budu chtít přečíst návratovou hodnu funkce asyncResult, mohu uvnitř jiné funkce použít await. Onu funkci ale musím obalit async a v podstatě jen vytvořím start asynchronní řetězení o scope výše. 
+Zkrátka - buď jsem uvnitř Promise a mám data v průbězně k dispozici (ala asyncResult.then(data =&gt; data).then(data =&gt; data)) a nebo se na wrapper divám zvenčí a do async rybníčku nemohu vstoupit aniž bych se také namočil.</p>
+
+<p>Zda využiji promise jako takovou nebo async/await (není to JEN syntax sugar, ale kombinace promise a generátorů), na problému asynchronní větve nic nemění.</p>
+
+<p>Nicméně, máme za sebou nutný úvod k tomu, abychom za async kódem v FP-TS nehledali nějakou novou magii, v zásadě se jedná o struktury, v tomto případě monády, schopné pracovat s klasickou promise v TypeScriptu. Tak vzhůru na ně.</p>
+
+<h1 id="task">Task</h1>
+
+<p>První monádou budiž struktura jménem Task, která reprezentuje asynchronní komputaci, u které se neočekává selhání. Její typová anotace je jednoduchá, v zasadě se jedná o lazy Promise. Typ tedy vypadá takto:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">Task</span> <span class="o">&lt;</span><span class="nx">A</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="p">():</span> <span class="nb">Promise</span> <span class="o">&lt;</span><span class="nx">A</span><span class="o">&gt;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Task interface je tedy Promise schovaná za funkcí, což už na první pohled dává tušit, že pro získání value není potřeba speciální aparatury ala Either/Maybe. Stačí zkrátka zavolat fci a použít například await.</p>
+
+<p>Zároveň je ale Task monádou, je tedy složen ze struktur jako monad, který extenduje apply(applicative), který  zase extenduje funktor atd. Má tedy k dispozici standardní “monadic API” ala map, chain.. Viz <a href="https://www.apitree.cz/blog/fp-ts-either">první článek</a> seriálu, případně úplný <a href="https://www.apitree.cz/blog/funkcionalni-programovani-v-typescriptu">úvod</a>.</p>
+
+<p>Samotným Taskem se prakticky zabývat nebudu a přejdu rovnou k praktičtější struktuře - TaskEither.</p>
+
+<h1 id="taskeither">TaskEither</h1>
+
+<p>TaskEither je narozdíl od Task komputace, u které lze očekávat záchyt chyby, a jak název napovídá, její interface vypadá a dokonce se přesně tak i chová - jako Either vnořený v Task, neboli Either uvnitř Promise schovaný za funkcí.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span>  <span class="nx">TaskEither</span><span class="o">&lt;</span><span class="nx">E</span><span class="p">,</span>  <span class="nx">A</span><span class="o">&gt;</span>  <span class="kd">extends</span>  <span class="nx">Task</span><span class="o">&lt;</span><span class="nx">Either</span><span class="o">&lt;</span><span class="nx">E</span><span class="p">,</span>  <span class="nx">A</span><span class="o">&gt;&gt;</span>  <span class="p">{}</span>
+</code></pre></div></div>
+
+<p>Pokud tedy zavolám například await taskEither(), získám typ Either&lt;E,  A&gt;.  TaskEither je monádou, u jeho API tedy platí (obecně) to samé jako u jiných monád (map, chain, etc..).</p>
+
+<p>Pojďme si ukázat, jak s TaskEither pracovat na jednoduchých příkladech.</p>
+
+<p>Nejprve si připravíme důvěrně známý kód:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">Data</span> <span class="p">{</span>
+    <span class="nl">data</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">id</span><span class="p">:</span> <span class="nx">string</span>
+        <span class="na">content</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nx">body</span> <span class="p">?</span> <span class="p">:</span> <span class="nx">string</span>
+            <span class="na">desc</span><span class="p">:</span> <span class="nx">string</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kr">interface</span> <span class="nx">SomeError</span> <span class="p">{</span>
+    <span class="nl">msg</span><span class="p">:</span> <span class="nx">string</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">someAsyncFn</span> <span class="o">=</span> <span class="k">async</span> <span class="p">():</span> <span class="nb">Promise</span> <span class="o">&lt;</span><span class="nx">Data</span><span class="p">[]</span><span class="o">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[{</span>
+            <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">id</span><span class="p">:</span> <span class="dl">"</span><span class="s2">1</span><span class="dl">"</span><span class="p">,</span>
+                <span class="na">content</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="na">body</span><span class="p">:</span> <span class="dl">"</span><span class="s2">some body content</span><span class="dl">"</span><span class="p">,</span>
+                    <span class="na">desc</span><span class="p">:</span> <span class="dl">"</span><span class="s2">some desc</span><span class="dl">"</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">id</span><span class="p">:</span> <span class="dl">"</span><span class="s2">2</span><span class="dl">"</span><span class="p">,</span>
+                <span class="na">content</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="na">body</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span>
+                    <span class="na">desc</span><span class="p">:</span> <span class="dl">"</span><span class="s2">some desc</span><span class="dl">"</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>SomeAsyncFn tedy vrací Promise a v ní pole typu Data. A nyní  pro obalení takovéto funkce - stejně jako v případe <a href="https://www.apitree.cz/blog/fp-ts-either">Either</a>  - využijeme build in funkci TaskEither, <strong>tryCatch</strong>, která asynchronní funkci obalí do TaskEither monády:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">getSomeAsyncData</span> <span class="o">=</span> <span class="nx">TE</span><span class="p">.</span><span class="nx">tryCatch</span> <span class="o">&lt;</span><span class="nx">SomeError</span><span class="p">,</span><span class="nx">Data</span><span class="p">[]</span><span class="o">&gt;</span> <span class="p">(</span>
+        <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">someAsyncFn</span><span class="p">(),</span>
+        <span class="nx">e</span> <span class="o">=&gt;</span> <span class="p">({</span>
+            <span class="na">msg</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span>
+        <span class="p">})</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p>Levá kolejnice tedy (v typu) znázorňuje chybový scénář, pravá data.</p>
+
+<p>Nyní na naše data můžeme začít v nějaké pipe řetězit. Připravíme si obyčejnou fci, u které fail neočekáváme (leda by přechozí TaskEither skončil v levé větvi):</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">addSomeNewData</span> <span class="o">=</span> <span class="p">(</span><span class="nx">toAdd</span><span class="p">:</span> <span class="nx">Data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="nx">data</span><span class="p">:</span> <span class="nx">Data</span><span class="p">[])</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[...</span><span class="nx">data</span><span class="p">,</span> <span class="nx">toAdd</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>A obě funkce vložíme do pipe:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span><span class="nx">getSomeAsyncData</span><span class="p">,</span> <span class="nx">TE</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">addSomeNewData</span><span class="p">({</span>
+    <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">id</span><span class="p">:</span> <span class="dl">"</span><span class="s2">3</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">content</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">desc</span><span class="p">:</span> <span class="dl">'</span><span class="s1">some another desc</span><span class="dl">'</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">})));</span>
+</code></pre></div></div>
+
+<p>Návratová hodnota result pipe má nyní typ <strong>TE.TaskEither&lt;SomeError,  Data[]&gt;</strong>.  TE.map příjmul TE.TaskEither&lt;SomeError,  Data[]&gt;, rozbalil value (vzal TaskEither a z funkce vracející Promise vytáhl pomocí then (resolve větev Promise) Either&lt;SomeError,  Data[]&gt;, checnul zda není Either v levé kolejnici, a pokud ne - na datech zavolal funkci addSomeNewData a výsledek obalil znovu do Either. Proto tedy <strong>TE.TaskEither&lt;SomeError,  Data[]</strong>&gt;.</p>
+
+<p>OK.  Co ale dělat v případě, že by naší  funkci getSomeAsyncData předcházela nějaký neasynchronní varianta monády, například obyčejný Either. I na to má FP-TS udělátko.</p>
+
+<p>Vyrobíme si tedy nejprve funkcí vracející Either, kterou předsuneme před všechny ostatní v pipe:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">beforeAllFunction</span> <span class="o">=</span> <span class="p">(</span><span class="nx">number</span><span class="p">:</span> <span class="mi">1</span> <span class="o">|</span> <span class="mi">2</span><span class="p">):</span> <span class="nx">E</span><span class="p">.</span><span class="nx">Either</span> <span class="o">&lt;</span><span class="nx">SomeError</span><span class="p">,</span><span class="nx">number</span><span class="o">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">number</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">number</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">E</span><span class="p">.</span><span class="nx">right</span><span class="p">(</span><span class="nx">number</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="k">return</span> <span class="nx">E</span><span class="p">.</span><span class="nx">left</span><span class="p">({</span>
+            <span class="na">msg</span><span class="p">:</span> <span class="dl">'</span><span class="s1">number is two, error!</span><span class="dl">'</span>
+        <span class="p">})</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>A nyní jí použijeme v pipe a jako přechod mezi Either a TaskEither využijeme opět API TaskEither, konkrétne funkci <strong>fromEither</strong>, která vezme Either, prověří zdá se nachází ve své left nebo right větvi, pokud v left - vyrobí taskEither a do jeho levé větve obalí původní chybu, pokud v right - posune do pravé větve TaskEither value.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">TE</span><span class="p">.</span><span class="nx">fromEither</span><span class="p">(</span><span class="nx">beforeAllFunction</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="nx">TE</span><span class="p">.</span><span class="nx">chain</span><span class="p">(</span><span class="nx">getSomeAsyncData</span><span class="p">),</span>
+    <span class="nx">TE</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">addSomeNewData</span><span class="p">({</span>
+        <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">id</span><span class="p">:</span> <span class="dl">"</span><span class="s2">3</span><span class="dl">"</span><span class="p">,</span>
+            <span class="na">content</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">desc</span><span class="p">:</span> <span class="dl">'</span><span class="s1">some another desc</span><span class="dl">'</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}))</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>Dobrá a nyní poslední varianta. Co kdybych z nějakého důvodu k datům uvnitř TaskEither (pravá větev) potřeboval uvnitř pipe přistoupit a nadále s nima pracovat například v klasické Option monádě? Jak jsem v úvodu článku deklaroval, TaskEither je jako návratová hodnota jen Either obalený funkcí a Promise - jednoduše tedy stačí pomocí then přejít do resolve větve Promise a s value pracovat jako se synchronní verzí Either.</p>
+
+<p>Druhou a zřejmě komfortnější variantou je  s daty manipulovat přímo uvnitř chain funkce:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">TE</span><span class="p">.</span><span class="nx">fromEither</span><span class="p">(</span><span class="nx">beforeAllFunction</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span>
+    <span class="nx">TE</span><span class="p">.</span><span class="nx">chain</span><span class="p">(</span><span class="nx">getSomeAsyncData</span><span class="p">),</span>
+    <span class="nx">TE</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">addSomeNewData</span><span class="p">({</span>
+        <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">id</span><span class="p">:</span> <span class="dl">"</span><span class="s2">3</span><span class="dl">"</span><span class="p">,</span>
+            <span class="na">content</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">desc</span><span class="p">:</span> <span class="dl">'</span><span class="s1">some another desc</span><span class="dl">'</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">})),</span>
+    <span class="nx">TE</span><span class="p">.</span><span class="nx">chain</span><span class="p">(</span>
+        <span class="nx">flow</span><span class="p">(</span>
+            <span class="nx">O</span><span class="p">.</span><span class="nx">fromNullable</span><span class="p">,</span>
+            <span class="nx">TE</span><span class="p">.</span><span class="nx">fromOption</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">({</span>
+                <span class="na">msg</span><span class="p">:</span> <span class="dl">'</span><span class="s1">from option error</span><span class="dl">'</span>
+            <span class="p">}))</span>
+        <span class="p">))</span>
+<span class="p">);</span>
+</code></pre></div></div>
+
+<p>Pro převzetí payloadu uvnitř posledního chain jsem využil <strong>flow</strong>, což je alternativa k pipe, která ale využívá partial application. Pro jistotu uvede jednoduchý příklad.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span>  <span class="nx">flowExample</span>  <span class="o">=</span>  <span class="nx">flow</span><span class="p">((</span><span class="nx">string</span><span class="p">:</span><span class="nx">string</span><span class="p">)</span>  <span class="o">=&gt;</span>  <span class="s2">`</span><span class="p">${</span><span class="nx">string</span><span class="p">}</span><span class="s2"> appendix`</span><span class="p">)(</span><span class="dl">'</span><span class="s1">string</span><span class="dl">'</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>Funkce vrátí value “string appendix”.</p>
+
+<p>Tak a to by pro dnešek bylo vše. Opět, jako vždy dodávám, že je API pro asynchronní programování FP-TS komplexnější, existují i další async varianty jako TaskOption nebo TaskEitherReader.  Zásadní je ale ukázka FP-TS pojetí asynchronních struktur JS/TS. Žádná magie, naše známe API (monáda, applicative, funktor..) složené do podoby schopné obsluhovat Promise.</p>
+
+<p>V dalším díle se konečně podíváme na různé nástroje pro efektivní řetězení, skládání, shlukování a iterace takovýchto struktur.  Protože žádná monáda nežije sama pro sebe! Takže zase zdar!</p>
+
+</p></div>
+</div>	
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-lg-offset-2">
+                        <div class="modal-body">
+                         
+                            <hr/>
+                            
+                            <ul class="list-inline item-details">
+                                
+                                
+                                    <li>Datum:
+                                        <strong><a href="http://startbootstrap.com">Červen 2020</a>
+                                        </strong>
+                                    </li>
+                                
+                                
+                                    <li>Kategorie:
+                                        <strong><a href="http://startbootstrap.com">TypeScript, NodeJS, funkcionální programování, async</a>
+                                        </strong>
+                                    </li>
+                                
+                            </ul>
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Zavřít</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="portfolio-modal modal fade" id="portfolioModal-2" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="close-modal" data-dismiss="modal">
+                <div class="lr">
+                    <div class="rl">
+                    </div>
+                </div>
+            </div>
  <h2>FP-TS 2 - Option </h2>
 <div class="container">
 	<div class="col-lg-12 text-left"><p><p><br />
@@ -215,7 +424,6 @@ V <a href="https://www.apitree.cz/blog/fp-ts-either">minulém díle</a> jsem se 
 Jestli je TypeScriptu (platí většinou i obecně napříč jazyky) nějaký další vývojářský perpetuum mobile, pak je to ošetřování null/undefined values a návazná problematika - jejich řetězení, zanořování, typová (ne)deklarace.</p>
 
 <p><strong>V čem je problém?</strong></p>
-
 <blockquote>
   <ul>
     <li>Undefined i null (byť null považuji za více controlled) jsou často velmi vágní ukazatel. Jednou vznikají kontrolovaně jako zamýšlený výsledek komputace, podruhé mimoděk - například jako dotaz na neexistující API, nezinicializovaná instance knihovny, nenalezená data, špatná časová inicializace u asynchronního programování atd.)</li>
@@ -230,157 +438,157 @@ Jestli je TypeScriptu (platí většinou i obecně napříč jazyky) nějaký da
 
 <p>Nyní k praktické ukázce. Nejprve tradiční přístup, poté přístup FP-TS.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>interface Client {
-    name: string,
-        data?: {
-            id: number,
-            title ? : string
-        } []
-}
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">Client</span> <span class="p">{</span>
+    <span class="nl">name</span><span class="p">:</span> <span class="nx">string</span><span class="p">,</span>
+        <span class="nx">data</span><span class="p">?:</span> <span class="p">{</span>
+            <span class="na">id</span><span class="p">:</span> <span class="nx">number</span><span class="p">,</span>
+            <span class="nx">title</span> <span class="p">?</span> <span class="p">:</span> <span class="nx">string</span>
+        <span class="p">}</span> <span class="p">[]</span>
+<span class="p">}</span>
 
-interface ErrorType1{
-    msg:string,
-    type:string
-}
-const errorType1 = (msg: string, type: string) =&gt; ({
-    msg,
-    type
-})
+<span class="kr">interface</span> <span class="nx">ErrorType1</span><span class="p">{</span>
+    <span class="nl">msg</span><span class="p">:</span><span class="nx">string</span><span class="p">,</span>
+    <span class="nx">type</span><span class="p">:</span><span class="nx">string</span>
+<span class="p">}</span>
+<span class="kd">const</span> <span class="nx">errorType1</span> <span class="o">=</span> <span class="p">(</span><span class="nx">msg</span><span class="p">:</span> <span class="nx">string</span><span class="p">,</span> <span class="nx">type</span><span class="p">:</span> <span class="nx">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+    <span class="nx">msg</span><span class="p">,</span>
+    <span class="nx">type</span>
+<span class="p">})</span>
 
-interface ErrorType2{
-    id: number
-    msg:string,
-}
-const errorType2 = (id: number, msg: string) =&gt; ({
-    msg,
-})
+<span class="kr">interface</span> <span class="nx">ErrorType2</span><span class="p">{</span>
+    <span class="nl">id</span><span class="p">:</span> <span class="nx">number</span>
+    <span class="nx">msg</span><span class="p">:</span><span class="nx">string</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="kd">const</span> <span class="nx">errorType2</span> <span class="o">=</span> <span class="p">(</span><span class="nx">id</span><span class="p">:</span> <span class="nx">number</span><span class="p">,</span> <span class="nx">msg</span><span class="p">:</span> <span class="nx">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">({</span>
+    <span class="nx">msg</span><span class="p">,</span>
+<span class="p">})</span>
 
 
-const initClient = () =&gt; {
-    const client = {
-        name: 'someClient',
-        data: [{
-                id: 1,
-                title: 'data1'
-            },
-            {
-                id: 2,
-                title: undefined
-            },
+<span class="kd">const</span> <span class="nx">initClient</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">client</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">someClient</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">data</span><span class="p">:</span> <span class="p">[{</span>
+                <span class="na">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">data1</span><span class="dl">'</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="na">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="na">title</span><span class="p">:</span> <span class="kc">undefined</span>
+            <span class="p">},</span>
 
-        ]
-    }
-    return client as Client | undefined; // fejkujeme nespolehlivého clienta pro účel článku
-}
+        <span class="p">]</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">client</span> <span class="k">as</span> <span class="nx">Client</span> <span class="o">|</span> <span class="kc">undefined</span><span class="p">;</span> <span class="c1">// fejkujeme nespolehlivého clienta pro účel článku</span>
+<span class="p">}</span>
 
-const printClientName = (client ? : Client) =&gt; {
-    if (client) {
-        console.log(client.name);
-        return client;
-    } else {
-        throw errorType1('client not found', 'COMMON');
-    }
-}
+<span class="kd">const</span> <span class="nx">printClientName</span> <span class="o">=</span> <span class="p">(</span><span class="nx">client</span> <span class="p">?</span> <span class="p">:</span> <span class="nx">Client</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">client</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">client</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nx">client</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">throw</span> <span class="nx">errorType1</span><span class="p">(</span><span class="dl">'</span><span class="s1">client not found</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">COMMON</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 
-const printFirstDataTitle = (clientData: {
-    id: number,
-    title ? : string
-} []) =&gt; {
-    if (clientData &amp;&amp; clientData.length &gt; 0) {
-        const clientDataTitle = clientData[0].title;
-        if(clientDataTitle){
-	        console.log(clientDataTitle );
-	        return clientDataTitle; 
-        }
-    } else {
-        throw errorType2(1, 'clientData error');
-    }
-}
+<span class="kd">const</span> <span class="nx">printFirstDataTitle</span> <span class="o">=</span> <span class="p">(</span><span class="nx">clientData</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nl">id</span><span class="p">:</span> <span class="nx">number</span><span class="p">,</span>
+    <span class="nx">title</span> <span class="p">?</span> <span class="p">:</span> <span class="nx">string</span>
+<span class="p">}</span> <span class="p">[])</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">clientData</span> <span class="o">&amp;&amp;</span> <span class="nx">clientData</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">clientDataTitle</span> <span class="o">=</span> <span class="nx">clientData</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">title</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">clientDataTitle</span><span class="p">){</span>
+	        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">clientDataTitle</span> <span class="p">);</span>
+	        <span class="k">return</span> <span class="nx">clientDataTitle</span><span class="p">;</span> 
+        <span class="p">}</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">throw</span> <span class="nx">errorType2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="dl">'</span><span class="s1">clientData error</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
 
-const resultPipe = pipe(
-    initClient(),
-    printClientName,
-    (client =&gt; client.data),
-    printFirstDataTitle
-)
+<span class="kd">const</span> <span class="nx">resultPipe</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">initClient</span><span class="p">(),</span>
+    <span class="nx">printClientName</span><span class="p">,</span>
+    <span class="p">(</span><span class="nx">client</span> <span class="o">=&gt;</span> <span class="nx">client</span><span class="p">.</span><span class="nx">data</span><span class="p">),</span>
+    <span class="nx">printFirstDataTitle</span>
+<span class="p">)</span>
 </code></pre></div></div>
 
-<p>Ano, kód by se samozřejmě dal strukturovat lépe, ale na druhou stranu poměrně věrně zobrazuje několik neduhů. V několika bodech by bylo snadné vyrobit chybu s chybějícím null checkem, handling erorru není vůbec vidět v typové anotaci/inference, ve finálním řetězu funkcí (pipe) se s errorem bez ohledání implementaci funkcí vůbec nepočítá a celé je to navíc při pohledu na pipe nic neříkající o nebezpečích, které funkce mohou ukrývat.</p>
+<p>Ano, kód by se samozřejmě dal strukturovat lépe, ale na druhou stranu poměrně věrně zobrazuje několik neduhů. V několika bodech by bylo snadné vyrobit chybu s chybějícím null checkem, handling erorru není vůbec vidět v typové anotaci/inference a celé je to navíc při pohledu na pipe nic neříkající o nebezpečích, které funkce mohou ukrývat.</p>
 
 <h1 id="option">Option</h1>
 
 <p>Nyní zkusíme variantu FP-TS a jednu z profláklejších monád - Option, občas zvanou jako Maybe.
-A protože jsme si v <a href="https://www.apitree.cz/blog/fp-ts-either">minulém článku</a> ukázali jako pracovat s Either monádou, využijeme rovnou jejich kombinaci.</p>
+A protože jsme si v <a href="https://www.apitree.cz/blog/fp-ts-either">minulém článku</a> ukázali jak pracovat s Either monádou, využijeme rovnou jejich kombinaci.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const initClient = (): O.Option &lt;Client&gt; =&gt; {
-    const client = {
-        name: 'someClient',
-        data: [{
-                id: 1,
-                title: 'data1'
-            },
-            {
-                id: 2,
-                title: undefined
-            },
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">initClient</span> <span class="o">=</span> <span class="p">():</span> <span class="nx">O</span><span class="p">.</span><span class="nx">Option</span> <span class="o">&lt;</span><span class="nx">Client</span><span class="o">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">client</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">someClient</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">data</span><span class="p">:</span> <span class="p">[{</span>
+                <span class="na">id</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="na">title</span><span class="p">:</span> <span class="dl">'</span><span class="s1">data1</span><span class="dl">'</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="na">id</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="na">title</span><span class="p">:</span> <span class="kc">undefined</span>
+            <span class="p">},</span>
 
-        ]
-    }
-    return O.fromNullable(client);
-}
+        <span class="p">]</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">O</span><span class="p">.</span><span class="nx">fromNullable</span><span class="p">(</span><span class="nx">client</span><span class="p">);</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>Jako první jsem si pomocí <strong>fromNullable</strong> vytvořil z undefined/null value nový typ: Option monádu: 
-typová anotace vypadá jako <strong>O.Option &lt; Client &gt;</strong> a v debugu by se nám objevil jevil jako <strong>{_tag: “Some”, value: Object}</strong>, případně jako <strong>{_tag: “None”}</strong>.</p>
+typová anotace vypadá jako <strong>O.Option &lt; Client &gt;</strong> a v debugu by se nám jevil jako <strong>{_tag: “Some”, value: Object}</strong>, případně jako <strong>{_tag: “None”}</strong>.</p>
 
 <p>A v <strong>{_tag: “None”}</strong> je právě ten fígl. Zaprvé - v Option monádě nadále nepracujeme s undefined nebo null value, ale speciálním objektem otagovaným jako None, přičemž jakýkoliv další map/chain volaný nad takovýmto objektem zkontroluje zda není otagovám jako None a rovnou posílá výsledek do kolejnice pro empty value. Podobně jako Either pracuje s left, pracuje i Maybe s tagem none.</p>
 
 <p>Jako další si vydefinujeme naší funkcí pro získání name z klienta, ale naschvál ji ponecháme bez ošetření, abychom si ukázali jak takovou funkci ošetříme obalením Maybe monádou “zvenčí”.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const printClientName = (client: Client) =&gt; {
-    console.log(client.name);
-    return client;
-}
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">printClientName</span> <span class="o">=</span> <span class="p">(</span><span class="nx">client</span><span class="p">:</span> <span class="nx">Client</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">client</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nx">client</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>OK. Vytvoříme si první kousky pipe z našich dvou funkcí. Pro přehled deklaruji typ předem.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const result: O.Option&lt;Client&gt; = pipe(
-    initClient(),
-    O.map(printClientName),
-)
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">result</span><span class="p">:</span> <span class="nx">O</span><span class="p">.</span><span class="nx">Option</span><span class="o">&lt;</span><span class="nx">Client</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">initClient</span><span class="p">(),</span>
+    <span class="nx">O</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">printClientName</span><span class="p">),</span>
+<span class="p">)</span>
 </code></pre></div></div>
 
-<p>Výsledek je tedy entita, která v prvním kroku ve funkci initClientFp a vrátí Option monádu - value nebo None.
+<p>Výsledek je tedy entita, která v prvním kroku ve funkci initClient a vrátí Option monádu - value nebo None.
 Následně použijeme funkci map, která jako první argument příjme naší Option monádu a jako druhý funkci.
-Interně prověří zda je příchozí monáda None, a pokud ano, jede po prázdné kolejničce a funkci printClientNameFp nikdy nevykoná.</p>
+Interně prověří zda je příchozí monáda None, a pokud ano, jede po prázdné kolejničce a funkci printClientName nikdy nevykoná.</p>
 
 <p>Popojedeme dál. V původních funkcích jsem “ručně” handloval error uvnitř scope, nyní si ukážeme jak ohandlovat prázdnout value zvenčí a propojit dvě monády přechodem mezi Option a Either. Pokud Option vrátí None, Either aktivuje svou levou větev a od programátora očekává chybovou událost.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const result: E.Either&lt;ErrorType1,Client&gt; = pipe(
-    initClient(),
-    O.mapNullable(printClientName),
-    E.fromOption(() =&gt; errorType1('client not found', 'COMMON'))
-)
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">result</span><span class="p">:</span> <span class="nx">E</span><span class="p">.</span><span class="nx">Either</span><span class="o">&lt;</span><span class="nx">ErrorType1</span><span class="p">,</span><span class="nx">Client</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">initClient</span><span class="p">(),</span>
+    <span class="nx">O</span><span class="p">.</span><span class="nx">mapNullable</span><span class="p">(</span><span class="nx">printClientName</span><span class="p">),</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">fromOption</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nx">errorType1</span><span class="p">(</span><span class="dl">'</span><span class="s1">client not found</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">COMMON</span><span class="dl">'</span><span class="p">))</span>
+<span class="p">)</span>
 </code></pre></div></div>
 
 <p>Typ se nám změnil na  <strong>E.Either&lt;ErrorType1,Client&gt;</strong>. Jasně deklarujeme, že máme co dočinění s možnou error value a už při čtení pipe, bez znalosti implementace funkcí, jasně vidíme že máme co dočinění s null/error handlingem.</p>
 
 <p>Nyní přepíšeme naší poslední funkcí, která musí nakouknout do prvního prvku pole (pokud existuje a pokud má alespoň jeden item), v prvku najít title  a ten vytisknout. V Případě že nenajde chybejici data, musí vrátit chybu a transformovat se v Either.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const printFirstDataTitle: E.Either&lt;ErrorType2,string&gt; = (clientData: {
-    id: number,
-    title ? : string
-} []) =&gt; pipe(
-    O.fromNullable(clientData),
-    O.chain((data) =&gt; A.lookup(0, data)),
-    O.mapNullable((item) =&gt; item.title),
-    O.map(title =&gt; {
-        console.log(title);
-        return title;
-    }),
-    E.fromOption(() =&gt; errorType2(1,'clientData error'))
-)
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">printFirstDataTitle</span><span class="p">:</span> <span class="nx">E</span><span class="p">.</span><span class="nx">Either</span><span class="o">&lt;</span><span class="nx">ErrorType2</span><span class="p">,</span><span class="nx">string</span><span class="o">&gt;</span> <span class="o">=</span> <span class="p">(</span><span class="nx">clientData</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nl">id</span><span class="p">:</span> <span class="nx">number</span><span class="p">,</span>
+    <span class="nx">title</span> <span class="p">?</span> <span class="p">:</span> <span class="nx">string</span>
+<span class="p">}</span> <span class="p">[])</span> <span class="o">=&gt;</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">O</span><span class="p">.</span><span class="nx">fromNullable</span><span class="p">(</span><span class="nx">clientData</span><span class="p">),</span>
+    <span class="nx">O</span><span class="p">.</span><span class="nx">chain</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">A</span><span class="p">.</span><span class="nx">lookup</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">data</span><span class="p">)),</span>
+    <span class="nx">O</span><span class="p">.</span><span class="nx">mapNullable</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">item</span><span class="p">.</span><span class="nx">title</span><span class="p">),</span>
+    <span class="nx">O</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">title</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">title</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nx">title</span><span class="p">;</span>
+    <span class="p">}),</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">fromOption</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nx">errorType2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="dl">'</span><span class="s1">clientData error</span><span class="dl">'</span><span class="p">))</span>
+<span class="p">)</span>
 </code></pre></div></div>
 
 <p>Chain nebo flatmap sme si vysvětlovali v minulém díle, ale pro jistotu zopakuji - chain vezme data z monády (O.fromNullable(clientData)) a aplikuje na ně funkci, která také vrací monádu (funkce A.lookup vrací Option&lt; itemZPole &gt;) a  narozdíl od map  už výsledek znovu nebalí sama do sebe - nevzniká tak Option uvnitř Option ala <strong>Option&lt;Option&lt; string»</strong>.</p>
@@ -389,36 +597,43 @@ Interně prověří zda je příchozí monáda None, a pokud ano, jede po prázd
 
 <p>Pojďme sestavit naší závěrečnou pipe.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const result = pipe(
-    initClient(),
-    O.mapNullable(printClientName),
-    E.fromOption(() =&gt; errorType1('client not found', 'COMMON')),
-    E.map(client =&gt; client.data),
-    E.chain(printFirstDataTitle) // printFirstDataTitle vrací Either&lt;ErrorType2, string&gt;,
-)
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">initClient</span><span class="p">(),</span>
+    <span class="nx">O</span><span class="p">.</span><span class="nx">mapNullable</span><span class="p">(</span><span class="nx">printClientName</span><span class="p">),</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">fromOption</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nx">errorType1</span><span class="p">(</span><span class="dl">'</span><span class="s1">client not found</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">COMMON</span><span class="dl">'</span><span class="p">)),</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">client</span> <span class="o">=&gt;</span> <span class="nx">client</span><span class="p">.</span><span class="nx">data</span><span class="p">),</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">chain</span><span class="p">(</span><span class="nx">printFirstDataTitle</span><span class="p">)</span> <span class="c1">// printFirstDataTitle vrací Either&lt;ErrorType2, string&gt;,</span>
+<span class="p">)</span>
 </code></pre></div></div>
 
 <p>Bác. Něco ošklivého se přihodilo. IDE vrátilo ošklivé červené s hláškou tohoto stříhu: <strong>Type ‘Left&lt; ErrorType1 &gt;’ is not assignable to type ‘Left&lt; ErrorType2 &gt;</strong>’.</p>
 
-<p>Co se právě přihodilo? Jedná se o neduh v chování FP-TS, který ve starších verzích knihovny poměrně komplikoval vývoj a nutil programátora k různým union typům, mapováním levé kolejnice Either a dalším hackům. FP-TS totiž při použití standardní funkce map/chain, typově vyžaduje stejný typ chyby v dané flow. Naštěstí existuje řešení jménem W neboli widen/unionise.</p>
+<p>Co se právě stalo? Jedná se o neduh v chování FP-TS, který ve starších verzích knihovny poměrně komplikoval vývoj a nutil programátora k různým union typům, mapováním levé kolejnice Either a dalším hackům. FP-TS totiž při použití standardní funkce map/chain, typově vyžaduje stejný typ chyby v dané flow. Naštěstí existuje řešení jménem W neboli <strong>widen/unionise</strong>.</p>
 
-<p>Pokud totiž namísto map/chain použijeme varianty <strong>mapW/chainW</strong>, vidíme již IDE zelené a naprosto správnou typovou notaci. 
-Tedy <strong>E.Either&lt;ErrorType1 | ErrorType2, string&gt;</strong>. Funkce printFirstDataTitle vrací jiný typ chyby(left) než errorType1 a naše pipe stav nyní správně reflektuje.</p>
+<table>
+  <tbody>
+    <tr>
+      <td>Pokud totiž namísto map/chain použijeme varianty <strong>mapW/chainW</strong>, vidíme již IDE zelené a naprosto správnou typovou notaci. Tedy **E.Either&lt;ErrorType1</td>
+      <td>ErrorType2,  string&gt;**. Funkce printFirstDataTitle vrací jiný typ chyby(left) než errorType1 a naše pipe stav nyní správně reflektuje.</td>
+    </tr>
+  </tbody>
+</table>
 
 <p>Výsledná funkce vypadá nyní takto:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const result: E.Either &lt;ErrorType1 | ErrorType2, string&gt; = pipe(
-    initClient(),
-    O.mapNullable(printClientName),
-    E.fromOption(() =&gt; errorType1('client not found', 'COMMON')),
-    E.map(client =&gt; client.data),
-    E.chainW(printFirstDataTitle),
-)
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">result</span><span class="p">:</span> <span class="nx">E</span><span class="p">.</span><span class="nx">Either</span> <span class="o">&lt;</span><span class="nx">ErrorType1</span> <span class="o">|</span> <span class="nx">ErrorType2</span><span class="p">,</span> <span class="nx">string</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">initClient</span><span class="p">(),</span>
+    <span class="nx">O</span><span class="p">.</span><span class="nx">mapNullable</span><span class="p">(</span><span class="nx">printClientName</span><span class="p">),</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">fromOption</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nx">errorType1</span><span class="p">(</span><span class="dl">'</span><span class="s1">client not found</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">COMMON</span><span class="dl">'</span><span class="p">)),</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">client</span> <span class="o">=&gt;</span> <span class="nx">client</span><span class="p">.</span><span class="nx">data</span><span class="p">),</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">chainW</span><span class="p">(</span><span class="nx">printFirstDataTitle</span><span class="p">),</span>
+<span class="p">)</span>
 </code></pre></div></div>
 
 <p>K praktické ukázce dodám, že záměrně jednou používám Either uvnitř řetězené funkce (printFirstDataTitle) a jednou přímo ve scope pipe uvnitř struktury result.  Samozřejmě -  v produkčním kódu by šlo design pofackovat a dát všemu štábní kulturu, 
-mým záměrem ale bylo poukázat na explicitní vyjádření povahy objektů v obou případech. Ať už je Either/Maybe/whatever struktura použita kdekoliv - například právě uvnitř jedné z řetězených funkcí - programátor musí zajet do kolejniček použitím mapování, čímž i při pohledu zvenčí (bez detailnější znalosti struktury fce), jasně deklaruje práci s potenciálně nullable,chybovým, jakýmkoliv stavem.
-Do USB-C prostě kabel od sekačky nenarvete. A každý jouda(funkce) se nemusí pokoušet rozbitou sekačkou zušlechťovat trávník. Stačí na ní jednou nalepit ceduli. Railway orintented programming v praxi.</p>
+mým záměrem ale bylo poukázat na explicitní vyjádření povahy objektů v obou případech. Ať už je Either/Maybe/whatever struktura použita kdekoliv - například právě uvnitř jedné z řetězených funkcí - programátor musí zajet do kolejniček použitím mapování, čímž i při pohledu zvenčí (bez detailnější znalosti struktury fce), jasně deklaruje práci s potenciálně nullable,chybovým, jakýmkoliv stavem.</p>
+
+<p>Do USB-C prostě kabel od sekačky nenarvete. A každý jouda(funkce) se nemusí pokoušet rozbitou sekačkou zušlechťovat trávník. Stačí na ní jednou nalepit ceduli. Railway orintented programming v praxi.</p>
 
 <h1 id="závěrem">Závěrem</h1>
 
@@ -461,7 +676,7 @@ Do USB-C prostě kabel od sekačky nenarvete. A každý jouda(funkce) se nemusí
         </div>
     </div>
 
-    <div class="portfolio-modal modal fade" id="portfolioModal-2" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="portfolio-modal modal fade" id="portfolioModal-3" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-content">
             <div class="close-modal" data-dismiss="modal">
                 <div class="lr">
@@ -496,40 +711,40 @@ V tomto povídání se chci zaměřit na error handling v TypeScriptu a jeho, dl
 
 <p>Praktická ukázka záměrně neoptimálního error handlingu v TS.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const getSomeDataThrow = (data: string) =&gt; {
-  try {
-    const result = fakeDataProducer(data);
-    return result.someData;
-  } catch (e) {
-    throw new Error(e);
-  }
-};
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">getSomeDataThrow</span> <span class="o">=</span> <span class="p">(</span><span class="nx">data</span><span class="p">:</span> <span class="nx">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">fakeDataProducer</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nx">result</span><span class="p">.</span><span class="nx">someData</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">};</span>
 </code></pre></div></div>
 
 <p>Kód je samozřejmě osekaný na minimum, ale problém je už při typové anotaci. TypeScript bez explicitního označení vrátí string, což může způsobit poměrně nepříjemné překvapení při pohledu zvenčí. Funkce nikterak neproklamuje, že je potenciálně nebezpečná a při kompozici více takovýchto entit, problém vyvstává násobně.</p>
 
 <p>Pokračujeme dál.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const getSomeDataLog = (data: string) =&gt; {
-  try {
-    const result = fakeDataProducer(data);
-    return result.someData;
-  } catch (e) {
-    db.someEntity.errors.push(e);
-    console.log(JSON.stringify(e));
-  }
-};
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">getSomeDataLog</span> <span class="o">=</span> <span class="p">(</span><span class="nx">data</span><span class="p">:</span> <span class="nx">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">fakeDataProducer</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nx">result</span><span class="p">.</span><span class="nx">someData</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">db</span><span class="p">.</span><span class="nx">someEntity</span><span class="p">.</span><span class="nx">errors</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">e</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">};</span>
 </code></pre></div></div>
 
 <p>Stejný problém v typové anotaci, funkce údajně vrací string a tentokrát nedochází k throw erroru, ale k zalogování a zápisu do db entity. Ano, typ se dá explicitně vyjádřit, ale svoboda je zrádná.</p>
 
 <p>Pokud obě funkce složíme do nějaké obdoby pipe/flow, obloha vypadá sluníčkově.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const result = pipe(
-  'some string data',
-  getSomeDataThrow,
-  getSomeDataLog,
-)
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+  <span class="dl">'</span><span class="s1">some string data</span><span class="dl">'</span><span class="p">,</span>
+  <span class="nx">getSomeDataThrow</span><span class="p">,</span>
+  <span class="nx">getSomeDataLog</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div></div>
 
 <p>Pod kapotou se ale pipe nyní může chovat nepředvídatelně. Přidejme asynchronní kód a na unhandled errory máme zaděláno.</p>
@@ -554,36 +769,36 @@ Typické pro monádu typu Either je (resp. technika, kterou Either implementuje)
 
 <p>Pojďme si tedy přepsat předchozí kód. Nejprve ve verzi, kdy si Either kolejnice explicitně nadefinujeme a trochu si zaprasíme. Poté v rafinovanější build in formě.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const getFakeDataEither = (data: string): E.Either&lt;Error, string&gt; =&gt; {
-  try {
-    const result = fakeDataProducer(data);
-    return E.right(result.someData);
-  } catch (e) {
-    return E.left(Error(e));
-  }
-};
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">getFakeDataEither</span> <span class="o">=</span> <span class="p">(</span><span class="nx">data</span><span class="p">:</span> <span class="nx">string</span><span class="p">):</span> <span class="nx">E</span><span class="p">.</span><span class="nx">Either</span><span class="o">&lt;</span><span class="nb">Error</span><span class="p">,</span> <span class="nx">string</span><span class="o">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">fakeDataProducer</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nx">E</span><span class="p">.</span><span class="nx">right</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">someData</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">E</span><span class="p">.</span><span class="nx">left</span><span class="p">(</span><span class="nb">Error</span><span class="p">(</span><span class="nx">e</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">};</span>
 </code></pre></div></div>
 
 <p>Jak je z kódu zřejmé. V případě že nedojde k zachycení chyby v try větvi, zabalíme hodnotu do pravé (té happy day) kolejnice. V případě že chybu zachytíme, pojedeme po kolejnici levé. Tadá, právě jsme vytvořili Either monádu, která jasně deklaruje chybový i nechybový scénář.</p>
 
 <p>Pojďme nyní napsat kód správně a využít předpřipravenou funkci vhodnou pro náš scénář.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const getFakeDataEither = (data: string): E.Either&lt;Error, string&gt; =&gt; {
-  return (
-    E.tryCatch &lt; Error,string &gt;(() =&gt; fakeDataProducer(data).someData, (e) =&gt; Error(JSON.stringify(e)))
-  );
-};
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">getFakeDataEither</span> <span class="o">=</span> <span class="p">(</span><span class="nx">data</span><span class="p">:</span> <span class="nx">string</span><span class="p">):</span> <span class="nx">E</span><span class="p">.</span><span class="nx">Either</span><span class="o">&lt;</span><span class="nb">Error</span><span class="p">,</span> <span class="nx">string</span><span class="o">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="nx">E</span><span class="p">.</span><span class="nx">tryCatch</span> <span class="o">&lt;</span> <span class="nb">Error</span><span class="p">,</span><span class="nx">string</span> <span class="o">&gt;</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nx">fakeDataProducer</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">someData</span><span class="p">,</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nb">Error</span><span class="p">(</span><span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">e</span><span class="p">)))</span>
+  <span class="p">);</span>
+<span class="p">};</span>
 </code></pre></div></div>
 
 <p>Využili jsme vestavěnou tryCatch funkci, která vrací Either monádu se stringem coby kladným výsledkem a Errorem coby chybovou hodnotou. Jasně deklarujeme co je naším záměrem, potenciální chybovost funkce, a type inference funguje dle očekávání (typ deklaruji jen pro přehled).</p>
 
 <p>Dobrá, máme tedy monádu. Co ale dál? Co takhle náš výsledný string rozšířit v případě, že se vykonání funkce povedlo? Jak ale na to, vždyť máme data zabalena v nějakém pochybném wrapperu? Použijme funkci map.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const eitherTest: E.Either&lt;Error, string&gt; = pipe(
-  "some string data",
-  getFakeDataEither,
-  E.map((value) =&gt; `${value} updated`)
-);
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">eitherTest</span><span class="p">:</span> <span class="nx">E</span><span class="p">.</span><span class="nx">Either</span><span class="o">&lt;</span><span class="nb">Error</span><span class="p">,</span> <span class="nx">string</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+  <span class="dl">"</span><span class="s2">some string data</span><span class="dl">"</span><span class="p">,</span>
+  <span class="nx">getFakeDataEither</span><span class="p">,</span>
+  <span class="nx">E</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">value</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s2">`</span><span class="p">${</span><span class="nx">value</span><span class="p">}</span><span class="s2"> updated`</span><span class="p">)</span>
+<span class="p">);</span>
 </code></pre></div></div>
 
 <p>Jak vidno, pro zachování našich kolejnic a update stringu, stačí jediné - využít vlastnost (odvozenou z funktoru) map, která je (jak jsem již výše popisoval) schopna rozbalit výsledek getFakeData, na výsledku provolat deklarovanou funkci s updatem value a data znovu do obálky zabalit. V případě, že by při volání getFakeData nastala chyba, následující funkce se nikdy nevykoná a monáda v levé branch podrží error.</p>
@@ -592,28 +807,28 @@ Typické pro monádu typu Either je (resp. technika, kterou Either implementuje)
 
 <p>Nejprve předvedu chybnou variantu.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const wrongEitherTest = pipe("some string data", getFakeDataEither, E.map(getFakeDataEither));
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">wrongEitherTest</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span><span class="dl">"</span><span class="s2">some string data</span><span class="dl">"</span><span class="p">,</span> <span class="nx">getFakeDataEither</span><span class="p">,</span> <span class="nx">E</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">getFakeDataEither</span><span class="p">));</span>
 </code></pre></div></div>
 
 <p>Jaký typ nám následující funkce vrací? E.Either&lt;Error,  E.Either&lt;Error,  string»
 Huh. Obálka v obálce. A nyní chain.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> const niceEitherTest = pipe("some string data", getFakeDataEither, E.chain(getFakeDataEither));
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kd">const</span> <span class="nx">niceEitherTest</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span><span class="dl">"</span><span class="s2">some string data</span><span class="dl">"</span><span class="p">,</span> <span class="nx">getFakeDataEither</span><span class="p">,</span> <span class="nx">E</span><span class="p">.</span><span class="nx">chain</span><span class="p">(</span><span class="nx">getFakeDataEither</span><span class="p">));</span>
 </code></pre></div></div>
 
 <p>Výsledným typem jest náš nádherný E.Either&lt;Error,  string&gt;</p>
 
 <p>Prozatím posledním krokem bude data z obálky vytáhnout. Frontendisté jsou banda nerudná (něco jako trpaslíci) a za návratovou hodnotu z API typu Object {_tag: “Right”, right: “some string data”}, by nás jistě vykostila.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const eitherFold: string = pipe(
-  "some string data",
-  getFakeDataEither,
-  E.chain(getFakeDataEither),
-  E.fold(
-    (e) =&gt; JSON.stringify(e),
-    (res) =&gt; res
-  )
-);
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">eitherFold</span><span class="p">:</span> <span class="nx">string</span> <span class="o">=</span> <span class="nx">pipe</span><span class="p">(</span>
+  <span class="dl">"</span><span class="s2">some string data</span><span class="dl">"</span><span class="p">,</span>
+  <span class="nx">getFakeDataEither</span><span class="p">,</span>
+  <span class="nx">E</span><span class="p">.</span><span class="nx">chain</span><span class="p">(</span><span class="nx">getFakeDataEither</span><span class="p">),</span>
+  <span class="nx">E</span><span class="p">.</span><span class="nx">fold</span><span class="p">(</span>
+    <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">e</span><span class="p">),</span>
+    <span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">res</span>
+  <span class="p">)</span>
+<span class="p">);</span>
 </code></pre></div></div>
 
 <p>Sic trochu kostrbatě, ale rozbalený string je na světě. Obecně je však ideální provádět transformace nad daty v obálkách a jejich rozbalení ponechávat na výstupy aplikace. Jak z hlediska znovupoužitelnosti, tak z pohledu handlingu side efektů.</p>
@@ -657,7 +872,7 @@ Samotná problematika řetězení a skládání algebraických struktur je kompl
         </div>
     </div>
 
-    <div class="portfolio-modal modal fade" id="portfolioModal-3" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="portfolio-modal modal fade" id="portfolioModal-4" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-content">
             <div class="close-modal" data-dismiss="modal">
                 <div class="lr">
@@ -699,44 +914,44 @@ Samotná problematika řetězení a skládání algebraických struktur je kompl
 
 <p>Pokusím se načrtnout jednoduchý příklad, je ale třeba si uvědomit, že se jedná o kousek ilustrativní, protože jádro nad přemýšlení o FP strukturách může být o level abstraktnější - ve strukturách algebraických.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>interface Washable {
-  wash: () =&gt; ...,
-  clean: () =&gt; ...,
-}
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">interface</span> <span class="nx">Washable</span> <span class="p">{</span>
+  <span class="nl">wash</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="nx">clean</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+<span class="p">}</span>
 
-interface Openable {
-  open: () =&gt; ...,
-  close: () =&gt; ...,
-}
+<span class="kr">interface</span> <span class="nx">Openable</span> <span class="p">{</span>
+  <span class="nl">open</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="nx">close</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+<span class="p">}</span>
 
-const vehicle: Washable &amp; Openable = {
-  wash: () =&gt; ...,
-  clean: () =&gt; ...,
-  open: () =&gt; ...,
-  close: () =&gt; ...,
-}
+<span class="kd">const</span> <span class="nx">vehicle</span><span class="p">:</span> <span class="nx">Washable</span> <span class="o">&amp;</span> <span class="nx">Openable</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">wash</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="na">clean</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="na">open</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="na">close</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+<span class="p">}</span>
 
-const table: Washable= {
-  wash: () =&gt; ...,
-  clean: () =&gt; ...,
-}
+<span class="kd">const</span> <span class="nx">table</span><span class="p">:</span> <span class="nx">Washable</span><span class="o">=</span> <span class="p">{</span>
+  <span class="na">wash</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="na">clean</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+<span class="p">}</span>
 
-const tableWithDoors: Washable &amp; Openable = {
-  wash: () =&gt; ...,
-  clean: () =&gt; ...,
-  open: () =&gt; ...,
-  close: () =&gt; ...,
-}
+<span class="kd">const</span> <span class="nx">tableWithDoors</span><span class="p">:</span> <span class="nx">Washable</span> <span class="o">&amp;</span> <span class="nx">Openable</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">wash</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="na">clean</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="na">open</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+  <span class="na">close</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">...,</span>
+<span class="p">}</span>
 
-const openAndWash = (entity: Washable &amp; Openable) = {
-  return entity.open().then(res =&gt; res.wash());
-}
+<span class="kd">const</span> <span class="nx">openAndWash</span> <span class="o">=</span> <span class="p">(</span><span class="nx">entity</span><span class="p">:</span> <span class="nx">Washable</span> <span class="o">&amp;</span> <span class="nx">Openable</span><span class="p">)</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">open</span><span class="p">().</span><span class="nx">then</span><span class="p">(</span><span class="nx">res</span> <span class="o">=&gt;</span> <span class="nx">res</span><span class="p">.</span><span class="nx">wash</span><span class="p">());</span>
+<span class="p">}</span>
 
-openAndWash(vehicle); 
-openAndWash(tableWithDoors); 
+<span class="nx">openAndWash</span><span class="p">(</span><span class="nx">vehicle</span><span class="p">);</span> 
+<span class="nx">openAndWash</span><span class="p">(</span><span class="nx">tableWithDoors</span><span class="p">);</span> 
 
-// bad
-openAndWash(table);
+<span class="c1">// bad</span>
+<span class="nx">openAndWash</span><span class="p">(</span><span class="nx">table</span><span class="p">);</span>
 </code></pre></div></div>
 
 <p>Jak je z obrázku patrné, funkci openAndWash nezajíma zda otevírá dveře u vozidla nebo od stolku, podstatná je pouze spolehlivost struktury - každá Washable struktura je schopná aplikovat clean. Stejně jako je funktor schopný vzít libovolná data z wrapperu, aplikovat na ně funkci a znovu je do obálky zabalit. A to je kánon.</p>
@@ -749,22 +964,22 @@ openAndWash(table);
 
 <p><strong>Řetězíme, řetězíme!</strong></p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const cleanMyCar = &lt;A&gt;(car:A) =&gt; pipe(
-    car,
-    openDoor,
-    cleanDoor,
-    closeDoor,
-    cleanWindow,
-    (car) =&gt; `${car} is now clean!`
-)
-​
-const cleanMyCar = &lt;A&gt;(car:A) =&gt; flow(
-    openDoor,
-    cleanDoor,
-    closeDoor,
-    cleanWindow,
-    (car) =&gt; (`${car} is now clean!`)
-)(car)
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">cleanMyCar</span> <span class="o">=</span> <span class="o">&lt;</span><span class="nx">A</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">car</span><span class="p">:</span><span class="nx">A</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">pipe</span><span class="p">(</span>
+    <span class="nx">car</span><span class="p">,</span>
+    <span class="nx">openDoor</span><span class="p">,</span>
+    <span class="nx">cleanDoor</span><span class="p">,</span>
+    <span class="nx">closeDoor</span><span class="p">,</span>
+    <span class="nx">cleanWindow</span><span class="p">,</span>
+    <span class="p">(</span><span class="nx">car</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s2">`</span><span class="p">${</span><span class="nx">car</span><span class="p">}</span><span class="s2"> is now clean!`</span>
+<span class="p">)</span>
+<span class="err">​</span>
+<span class="kd">const</span> <span class="nx">cleanMyCar</span> <span class="o">=</span> <span class="o">&lt;</span><span class="nx">A</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">car</span><span class="p">:</span><span class="nx">A</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">flow</span><span class="p">(</span>
+    <span class="nx">openDoor</span><span class="p">,</span>
+    <span class="nx">cleanDoor</span><span class="p">,</span>
+    <span class="nx">closeDoor</span><span class="p">,</span>
+    <span class="nx">cleanWindow</span><span class="p">,</span>
+    <span class="p">(</span><span class="nx">car</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">car</span><span class="p">}</span><span class="s2"> is now clean!`</span><span class="p">)</span>
+<span class="p">)(</span><span class="nx">car</span><span class="p">)</span>
 </code></pre></div></div>
 
 <p>Obrázek je poměrně popisný - jestli je pro FP něco (nejen) vizuálně typické, je to řetězení funkcí do postupně navazujícího celku či skládání jednodušších funkcí do komplexnějších.</p>
@@ -784,13 +999,13 @@ const cleanMyCar = &lt;A&gt;(car:A) =&gt; flow(
 
 <p>Pradávná mantra neplatí jistě jen pro FP, ale opakování je matkou moudrosti. Skládáme, protínáme, vyjímáme, nedědíme. Komplexnější funkce vznikají kompozicí samostatně testovatelných jednodušších celků.  <strong>Netvoříme božské monolity, ale variabilní kousky stavebnice.</strong></p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const postService  = &lt;A,B,C&gt;() =&gt; ({
-  ...withSendMessage,
-  ...withCreateMessage,
-  ...withReadMessage,
-  ...withListItems,
-  sayHello: () =&gt; 'hello! :-)'
-})
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">postService</span>  <span class="o">=</span> <span class="o">&lt;</span><span class="nx">A</span><span class="p">,</span><span class="nx">B</span><span class="p">,</span><span class="nx">C</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">({</span>
+  <span class="p">...</span><span class="nx">withSendMessage</span><span class="p">,</span>
+  <span class="p">...</span><span class="nx">withCreateMessage</span><span class="p">,</span>
+  <span class="p">...</span><span class="nx">withReadMessage</span><span class="p">,</span>
+  <span class="p">...</span><span class="nx">withListItems</span><span class="p">,</span>
+  <span class="na">sayHello</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="dl">'</span><span class="s1">hello! :-)</span><span class="dl">'</span>
+<span class="p">})</span>
 </code></pre></div></div>
 
 <h3 id="a-kde-jsou-co-sakra-ty-monády">A kde jsou co sakra ty monády?!</h3>
